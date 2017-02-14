@@ -1,0 +1,26 @@
+<resources>
+    <string name="app_name">Auto Checker</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_auto_checker_records">AutoCheckerRecordsActivity</string>
+    <string name="section_format">Hello World from section: %1$d</string>
+    <string name="title_activity_test">TestActivity</string>
+
+
+    <string name="week_day">Week day</string>
+    <string name="location_name">Name</string>
+    <string name="inside_location">Inside</string>
+    <string name="outside_location">Outside</string>
+    <string name="empty_locations_list">No locations found</string>
+    <string name="first_last_day_record">00:00 - 00:00</string>
+    <string name="record_duration">00:00</string>
+    <string name="total_duration">Total</string>
+
+
+    <string name="notification_title_enter">You entered </string>
+    <string name="notification_title_leave">You left </string>
+
+    <string name="notification_text">Event registered at </string>
+    <string name="title_activity_auto_checker_main">AutoCheckerMainActivity</string>
+    <string name="inside_outside_menu">Are you inside?</string>
+
+</resources>

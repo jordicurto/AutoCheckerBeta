@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.github.aakira.expandablelayout.ExpandableLinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/expand_usage_graphs"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    app:ael_expanded="false"
+    app:ael_duration="300"
+    app:ael_interpolator="fastOutLinearIn"
+    android:padding="5dp">
+
+    <com.github.mikephil.charting.charts.HorizontalBarChart
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:id="@+id/graphMorning" />
+
+    <com.github.mikephil.charting.charts.HorizontalBarChart
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:id="@+id/graphEvening" />
+
+    <com.github.mikephil.charting.charts.HorizontalBarChart
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:id="@+id/graphNight" />
+
+</com.github.aakira.expandablelayout.ExpandableLinearLayout>

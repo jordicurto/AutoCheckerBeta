@@ -1,0 +1,15 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:context="com.github.jordicurto.autochecker.activity.AutoCheckerMainActivity">
+    <item android:showAsAction="always"
+        android:id="@+id/inside_location_action"
+        android:icon="@drawable/ic_outside_indicator_action"
+        android:enabled="false"
+        android:checkable="false" />
+    <item
+        android:id="@+id/action_settings"
+        android:orderInCategory="102"
+        android:title="@string/action_settings"
+        app:showAsAction="never" />
+</menu>

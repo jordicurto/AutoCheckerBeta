@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Auto Checker</string>
+    <string name="action_settings">Opcions</string>
+    <string name="title_activity_auto_checker_records">AutoCheckerRecordsActivity</string>
+    <string name="title_activity_test">TestActivity</string>
+
+
+    <string name="week_day">Dia de la setmana</string>
+    <string name="location_name">Nom</string>
+    <string name="inside_location">Dins</string>
+    <string name="outside_location">Fora</string>
+    <string name="empty_locations_list">No s\'ha trobat cap localització</string>
+    <string name="first_last_day_record">00:00 - 00:00</string>
+    <string name="record_duration">00:00</string>
+    <string name="total_duration">Total</string>
+
+
+    <string name="notification_title_enter">Has entrat a</string>
+    <string name="notification_title_leave">Has sortit de</string>
+
+    <string name="notification_text">S\'ha registrat l\'event a les</string>
+
+    <string name="inside_outside_menu">Esteu dins?</string>
+
+</resources>
