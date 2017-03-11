@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "23.0.1"
+    buildToolsVersion '25.0.0'
 
     defaultConfig {
         applicationId "com.github.jordicurto.autochecker"
@@ -36,8 +36,7 @@ dependencies {
     compile 'com.google.android.gms:play-services-maps:8.4.0'
     compile 'com.github.PhilJay:MPAndroidChart:v2.1.6'
     compile 'com.android.support:support-v4:23.4.0'
-    compile 'com.kyleduo.switchbutton:library:1.4.0'
-    compile 'com.mikhaellopez:hfrecyclerview:1.0.0'
     compile 'com.android.support.constraint:constraint-layout:1.0.0-beta4'
     compile 'com.github.aakira:expandable-layout:1.6.0@aar'
+    compile 'net.danlew:android.joda:2.9.5.1'
 }

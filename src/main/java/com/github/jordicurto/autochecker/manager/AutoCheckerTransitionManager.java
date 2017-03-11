@@ -15,6 +15,8 @@ import com.github.jordicurto.autochecker.data.model.WatchedLocationRecord;
 import com.github.jordicurto.autochecker.constants.AutoCheckerConstants;
 import com.github.jordicurto.autochecker.util.ContextKeeper;
 
+import org.joda.time.LocalDateTime;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -86,7 +88,8 @@ public class AutoCheckerTransitionManager extends ContextKeeper {
 
             Log.d(TAG, "Processing enter event");
 
-            AutoCheckerBusinessManager.getManager(mContext).createCheckInRecord(location, new Date(time));
+            AutoCheckerBusinessManager.getManager(mContext).createCheckInRecord(location,
+                    new LocalDateTime(time));
         }
     }
 
@@ -96,7 +99,8 @@ public class AutoCheckerTransitionManager extends ContextKeeper {
 
             Log.d(TAG, "Processing leave event");
 
-            AutoCheckerBusinessManager.getManager(mContext).updateCheckOutRecord(location, new Date(time));
+            AutoCheckerBusinessManager.getManager(mContext).updateCheckOutRecord(location,
+                    new LocalDateTime(time));
         }
     }
 }

@@ -18,6 +18,13 @@ import com.github.jordicurto.autochecker.data.model.WatchedLocation;
 import com.github.jordicurto.autochecker.data.model.WatchedLocationRecord;
 import com.github.jordicurto.autochecker.util.DateUtils;
 
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeUtils;
+import org.joda.time.Duration;
+import org.joda.time.Interval;
+import org.joda.time.LocalDateTime;
+import org.joda.time.chrono.StrictChronology;
+
 public class AutoCheckerDataSource {
 
 	private final String TAG = getClass().getSimpleName();
@@ -53,11 +60,11 @@ public class AutoCheckerDataSource {
 			WatchedLocation location) {
 
 		record.setId(cursor.getInt(AutoCheckerSQLiteOpenHelper.COLUMN_ID_INDEX));
-		record.setCheckIn(new Date(cursor.getLong(AutoCheckerSQLiteOpenHelper.COLUMN_CHECKIN_INDEX)));
+		record.setCheckIn(new LocalDateTime(cursor.getLong(AutoCheckerSQLiteOpenHelper.COLUMN_CHECKIN_INDEX)));
 		if (cursor.isNull(AutoCheckerSQLiteOpenHelper.COLUMN_CHECKOUT_INDEX)) {
 			record.setCheckOut(null);
 		} else {
-			record.setCheckOut(new Date(cursor.getLong(AutoCheckerSQLiteOpenHelper.COLUMN_CHECKOUT_INDEX)));
+			record.setCheckOut(new LocalDateTime(cursor.getLong(AutoCheckerSQLiteOpenHelper.COLUMN_CHECKOUT_INDEX)));
 		}
 		record.setLocation(location);
 
@@ -81,11 +88,11 @@ public class AutoCheckerDataSource {
 		ContentValues values = new ContentValues();
 
 		values.put(AutoCheckerSQLiteOpenHelper.COLUMN_LOCATION_ID, record.getLocation().getId());
-		values.put(AutoCheckerSQLiteOpenHelper.COLUMN_CHECKIN, record.getCheckIn().getTime());
+		values.put(AutoCheckerSQLiteOpenHelper.COLUMN_CHECKIN, record.getCheckIn().toDateTime().getMillis());
 		if (record.getCheckOut() == null) {
 			values.putNull(AutoCheckerSQLiteOpenHelper.COLUMN_CHECKOUT);
 		} else {
-			values.put(AutoCheckerSQLiteOpenHelper.COLUMN_CHECKOUT, record.getCheckOut().getTime());
+			values.put(AutoCheckerSQLiteOpenHelper.COLUMN_CHECKOUT, record.getCheckOut().toDateTime().getMillis());
 		}
 
 		return values;
@@ -229,13 +236,17 @@ public class AutoCheckerDataSource {
 	}
 
 	public List<WatchedLocationRecord> getIntervalWatchedLocationRecord(WatchedLocation location,
-																		Date start, Date end) {
+																		Interval interval,
+                                                                        int startHourDay) {
+
+        DateTime start = interval.getStart().plusHours(startHourDay);
+        DateTime end = interval.getEnd().plusHours(startHourDay);
 
 		Cursor cursor = database.query(AutoCheckerSQLiteOpenHelper.TABLE_RECORDS_NAME,
 				AutoCheckerSQLiteOpenHelper.COLUMNS_TABLE_RECORDS,
 				AutoCheckerSQLiteOpenHelper.COLUMN_LOCATION_ID + " = " + location.getId() + " and "
-						+ AutoCheckerSQLiteOpenHelper.COLUMN_CHECKIN + " between " + start.getTime() + " and "
-						+ end.getTime(),
+						+ AutoCheckerSQLiteOpenHelper.COLUMN_CHECKIN + " between "
+                        + start.getMillis() + " and " + end.getMillis(),
 				null, null, null, AutoCheckerSQLiteOpenHelper.COLUMN_CHECKIN + " asc");
 
 		List<WatchedLocationRecord> records = new ArrayList<WatchedLocationRecord>();
@@ -251,13 +262,10 @@ public class AutoCheckerDataSource {
 		return records;
 	}
 
-	public boolean existsWatchedLocationRecordsWithinInterval(WatchedLocation location, Date start,
-															  Date end) {
+	public Interval getLimitDates(WatchedLocation location) {
 
-		return !(getIntervalWatchedLocationRecord(location, start, end).isEmpty());
-	}
-
-	public Pair<Date, Date> getLimitDates(WatchedLocation location) {
+		Interval interval = new Interval(DateUtils.getCurrentDate().toDateTime(),
+				Duration.millis(0));
 
 		Cursor cursor = database.query(AutoCheckerSQLiteOpenHelper.TABLE_RECORDS_NAME,
 				AutoCheckerSQLiteOpenHelper.COLUMNS_TABLE_RECORDS,
@@ -271,13 +279,17 @@ public class AutoCheckerDataSource {
 			setWatchedLocationRecordContents(cursor, firstRecord, location);
 			cursor.moveToLast();
 			setWatchedLocationRecordContents(cursor, lastRecord, location);
+			interval = new Interval(firstRecord.getCheckIn().toDateTime(),
+					lastRecord.getCheckOut() != null ? lastRecord.getCheckOut().toDateTime()
+							: DateUtils.getCurrentDate().toDateTime()
+			);
 		} else {
 			Log.d(TAG, "No records found for " + location.toString());
 		}
 
 		cursor.close();
 
-		return new Pair<Date, Date>(firstRecord.getCheckIn(), lastRecord.getCheckOut());
+		return interval;
 	}
 
 	public boolean isUserInWatchedLocation(WatchedLocation location) {

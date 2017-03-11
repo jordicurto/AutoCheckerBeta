@@ -1,13 +1,9 @@
 package com.github.jordicurto.autochecker.constants;
 
 import com.github.jordicurto.autochecker.data.model.WatchedLocation;
-import com.github.jordicurto.autochecker.data.model.WatchedLocationRecord;
-import com.github.jordicurto.autochecker.util.Duration;
+import com.github.jordicurto.autochecker.util.DateUtils;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.TimeZone;
+import org.joda.time.DateTimeConstants;
 
 public class AutoCheckerConstants {
 
@@ -21,8 +17,8 @@ public class AutoCheckerConstants {
 	public static final WatchedLocation WL_GTD = new WatchedLocation("GTD", 2.209514, 41.400665, 100);
 
     public static final long INVALID_DELAY = -1L;
-    public static final long DELAY_FOR_SUSPECT_TRANSITION = 3 * Duration.MINS_PER_MILLISECOND;
-    public static final long DELAY_FOR_STANDARD_TRANSITION = 1 * Duration.SECS_PER_MILLISECOND;
+    public static final long DELAY_FOR_SUSPECT_TRANSITION = 3 * DateUtils.MINS_PER_MILLISECOND;
+    public static final long DELAY_FOR_STANDARD_TRANSITION = 1 * DateTimeConstants.MILLIS_PER_SECOND;
 
     public static final String GEOFENCE_TRANSITION_RECEIVED = "GEOFENCE_TRANSITION_RECEIVED";
 	public static final String GEOFENCE_TRANSITION_CONFIRM_RECEIVED = "GEOFENCE_TRANSITION_CONFIRM_RECEIVED";
@@ -41,75 +37,4 @@ public class AutoCheckerConstants {
 
     public static final int DEFAULT_START_DAY_HOUR = 6;
 
-
-    public static List<WatchedLocationRecord> getDummyRecords(WatchedLocation location) {
-
-		Calendar cal = Calendar.getInstance();
-		cal.setTimeZone(TimeZone.getTimeZone("UTC"));
-		List<WatchedLocationRecord> records = new ArrayList<>();
-		WatchedLocationRecord rec = new WatchedLocationRecord();
-		rec.setLocation(location);
-
-		cal.set(2016, Calendar.MAY, 9, 9, 0, 0);
-		rec.setCheckIn(cal.getTime());
-		cal.set(2016, Calendar.MAY, 9, 11, 0, 0);
-		rec.setCheckOut(cal.getTime());
-		records.add(rec);
-
-		rec = new WatchedLocationRecord();
-		rec.setLocation(location);
-
-		cal.set(2016, Calendar.MAY, 9, 12, 0, 0);
-		rec.setCheckIn(cal.getTime());
-		cal.set(2016, Calendar.MAY, 9, 12, 30, 0);
-		rec.setCheckOut(cal.getTime());
-		records.add(rec);
-
-		rec = new WatchedLocationRecord();
-		rec.setLocation(location);
-
-		cal.set(2016, Calendar.MAY, 9, 13, 0, 0);
-		rec.setCheckIn(cal.getTime());
-		cal.set(2016, Calendar.MAY, 9, 13, 30, 0);
-		rec.setCheckOut(cal.getTime());
-		records.add(rec);
-
-		rec = new WatchedLocationRecord();
-		rec.setLocation(location);
-
-		cal.set(2016, Calendar.MAY, 9, 14, 30, 0);
-		rec.setCheckIn(cal.getTime());
-		cal.set(2016, Calendar.MAY, 9, 16, 30, 0);
-		rec.setCheckOut(cal.getTime());
-		records.add(rec);
-
-		rec = new WatchedLocationRecord();
-		rec.setLocation(location);
-
-		cal.set(2016, Calendar.MAY, 9, 17, 0, 0);
-		rec.setCheckIn(cal.getTime());
-		cal.set(2016, Calendar.MAY, 9, 22, 0, 0);
-		rec.setCheckOut(cal.getTime());
-		records.add(rec);
-
-		rec = new WatchedLocationRecord();
-		rec.setLocation(location);
-
-		cal.set(2016, Calendar.MAY, 9, 22, 30, 0);
-		rec.setCheckIn(cal.getTime());
-		cal.set(2016, Calendar.MAY, 9, 23, 30, 0);
-		rec.setCheckOut(cal.getTime());
-		records.add(rec);
-
-		rec = new WatchedLocationRecord();
-		rec.setLocation(location);
-
-		cal.set(2016, Calendar.MAY, 10, 0, 30, 0);
-		rec.setCheckIn(cal.getTime());
-		cal.set(2016, Calendar.MAY, 10, 2, 30, 0);
-		rec.setCheckOut(cal.getTime());
-		records.add(rec);
-
-		return records;
-	}
 }

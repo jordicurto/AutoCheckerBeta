@@ -2,7 +2,7 @@
       xmlns:app="http://schemas.android.com/apk/res-auto"
       xmlns:tools="http://schemas.android.com/tools"
       tools:context="com.github.jordicurto.autochecker.activity.AutoCheckerMainActivity">
-    <item android:showAsAction="always"
+    <item app:showAsAction="always"
         android:id="@+id/inside_location_action"
         android:icon="@drawable/ic_outside_indicator_action"
         android:enabled="false"

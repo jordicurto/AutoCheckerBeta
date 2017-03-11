@@ -13,6 +13,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -23,9 +24,11 @@ import com.github.jordicurto.autochecker.fragment.AutoCheckerWeekRecordsFragment
 import com.github.jordicurto.autochecker.manager.AutoCheckerBusinessManager;
 import com.github.jordicurto.autochecker.util.DateUtils;
 
+import org.joda.time.Interval;
+
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
 
 public class AutoCheckerMainActivity extends AppCompatActivity {
 
@@ -43,10 +46,13 @@ public class AutoCheckerMainActivity extends AppCompatActivity {
      * The {@link ViewPager} that will host the section contents.
      */
     private ViewPager mViewPager;
+    private TabLayout mTabLayout;
+
+    private ScheduledExecutorService mSchduledReload;
 
     private WatchedLocation location;
 
-    private List<Date> intervalTabDates = new ArrayList<>();
+    private List<Interval> intervalTabDates = new ArrayList<>();
     private int startDayHour;
     private boolean showWeekends;
 
@@ -54,8 +60,6 @@ public class AutoCheckerMainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_auto_checker_main);
-
-        loadContents();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -67,12 +71,43 @@ public class AutoCheckerMainActivity extends AppCompatActivity {
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(mViewPager);
+        mTabLayout = (TabLayout) findViewById(R.id.tabs);
+        mTabLayout.setupWithViewPager(mViewPager);
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+/*
+        mSchduledReload = Executors.newSingleThreadScheduledExecutor();
+        mSchduledReload.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                mViewPager.getAdapter().notifyDataSetChanged();
+            }
+        }, 30, 30, TimeUnit.SECONDS);
+*/
+
+        loadContents();
+
+        selectLastTab();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+//        mSchduledReload.shutdown();
+    }
+
+    private void selectLastTab() {
+        if (mTabLayout.getTabCount() > 0)
+            mTabLayout.getTabAt(mTabLayout.getTabCount() - 1).select();
     }
 
     private void loadContents() {
+
+        Log.d(getClass().getSimpleName(), "Loading contents");
 
         SharedPreferences prefs = getPreferences(Context.MODE_PRIVATE);
 
@@ -88,15 +123,18 @@ public class AutoCheckerMainActivity extends AppCompatActivity {
         location = manager.getWatchedLocation(currentLocationName);
         startDayHour = prefs.getInt(AutoCheckerConstants.PREF_START_DAY_HOUR,
                 AutoCheckerConstants.DEFAULT_START_DAY_HOUR);
-        intervalTabDates = manager.getDateIntervals(location, startDayHour,
-                DateUtils.WEEK_INTERVAL_TYPE);
+        intervalTabDates = manager.getDateIntervals(location, DateUtils.INTERVAL_TYPE.WEEKS);
         showWeekends = prefs.getBoolean(AutoCheckerConstants.PREF_SHOW_WEEKENDS, false);
 
         setTitle(currentLocationName);
 
+        invalidateOptionsMenu();
+
+        mViewPager.getAdapter().notifyDataSetChanged();
+
         if (!prefs.getBoolean(AutoCheckerConstants.FIRST_RUN, false)) {
             sendBroadcast(new Intent(AutoCheckerConstants.LOCATIONS_ACTIVITY_FIRST_RUN));
-            prefs.edit().putBoolean(AutoCheckerConstants.FIRST_RUN, true).commit();
+            prefs.edit().putBoolean(AutoCheckerConstants.FIRST_RUN, true).apply();
         }
     }
 
@@ -106,6 +144,21 @@ public class AutoCheckerMainActivity extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_auto_checker_main, menu);
         return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+
+        MenuItem insideLocationIndicator = menu.findItem(R.id.inside_location_action);
+
+        if (location != null) {
+            if (location.isInside())
+                insideLocationIndicator.setIcon(R.drawable.ic_inside_indicator_action);
+            else
+                insideLocationIndicator.setIcon(R.drawable.ic_outside_indicator_action);
+        }
+
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
@@ -136,17 +189,22 @@ public class AutoCheckerMainActivity extends AppCompatActivity {
         @Override
         public Fragment getItem(int i) {
             return AutoCheckerWeekRecordsFragment.newInstance(location.getId(),
-                    intervalTabDates.get(i), startDayHour, showWeekends);
+                    intervalTabDates.get(i).getStart().toLocalDate(), startDayHour, showWeekends);
         }
 
         @Override
         public int getCount() {
-            return intervalTabDates.size() - 1;
+            return intervalTabDates.size();
+        }
+
+        @Override
+        public int getItemPosition(Object object) {
+            return POSITION_NONE;
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
-            return DateUtils.getDateIntervalString(intervalTabDates, position);
+            return DateUtils.getDateIntervalString(intervalTabDates.get(position));
         }
     }
 }

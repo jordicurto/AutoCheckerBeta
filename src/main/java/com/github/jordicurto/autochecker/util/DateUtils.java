@@ -1,198 +1,144 @@
 package com.github.jordicurto.autochecker.util;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
+import com.github.jordicurto.autochecker.data.model.WatchedLocationRecord;
 
-import android.util.Pair;
+import org.joda.time.*;
+import org.joda.time.Duration;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.DateTimeFormatterBuilder;
+import org.joda.time.format.PeriodFormatter;
+import org.joda.time.format.PeriodFormatterBuilder;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Created by jordi on 21/02/17.
+ */
 
 public class DateUtils {
 
-    public static final SimpleDateFormat timeFormat = new SimpleDateFormat(
-            "HH:mm", Locale.getDefault());
-    public static final SimpleDateFormat hourFormat = new SimpleDateFormat(
-            "H", Locale.getDefault());
-    public static final SimpleDateFormat dayFormat = new SimpleDateFormat(
-            "cccc, d", Locale.getDefault());
-    public static final SimpleDateFormat weekFormat = new SimpleDateFormat(
-            "d MMMM", Locale.getDefault());
-    public static final SimpleDateFormat weekDayFormat = new SimpleDateFormat(
-            "d", Locale.getDefault());
+    public static final int MINS_PER_MILLISECOND =
+            DateTimeConstants.SECONDS_PER_MINUTE * DateTimeConstants.MILLIS_PER_SECOND;
+    public static final int HOURS_PER_MILLISECOND =
+            DateTimeConstants.MINUTES_PER_HOUR * MINS_PER_MILLISECOND;
+    public static final int DAYS_PER_MILLISECOND =
+            DateTimeConstants.HOURS_PER_DAY * HOURS_PER_MILLISECOND;
 
-    public static final int DAY_INTERVAL_TYPE = 0;
-    public static final int WEEK_INTERVAL_TYPE = 1;
-    public static final int MONTH_INTERVAL_TYPE = 2;
+    public static final DateTimeFormatter timeFormat =
+            new DateTimeFormatterBuilder().appendHourOfDay(2).appendLiteral(":")
+                    .appendMinuteOfHour(2).toFormatter();
+    public static final PeriodFormatter durationFormat =
+            new PeriodFormatterBuilder().printZeroAlways().minimumPrintedDigits(2)
+                    .appendHours().appendLiteral(":").appendMinutes().toFormatter();
+    public static final DateTimeFormatter dayFormat =
+            new DateTimeFormatterBuilder().appendDayOfWeekText()
+                    .appendLiteral(", ").appendDayOfMonth(1).toFormatter();
+    public static final DateTimeFormatter weekFormat =
+            new DateTimeFormatterBuilder().appendDayOfMonth(1).appendLiteral(" ").
+                    appendMonthOfYearText().toFormatter();
+    public static final DateTimeFormatter weekDayFormat =
+            new DateTimeFormatterBuilder().appendDayOfMonth(1).toFormatter();
+    public static final DateTimeFormatter hourFormat =
+            new DateTimeFormatterBuilder().appendHourOfDay(1).toFormatter();
 
-    public static List<Date> getDateIntervals(Date start, Date end, int startDayHour,
-                                              int intervalType) {
+    public enum INTERVAL_TYPE {
+        DAYS(0),
+        WEEKS(1),
+        MONTHS(2);
 
-        Calendar startCalendar = Calendar.getInstance();
-        startCalendar.setTime(start);
+        private int index;
 
-        Calendar endCalendar = Calendar.getInstance();
-        endCalendar.setTime(end);
-
-        startCalendar.add(Calendar.HOUR_OF_DAY, startDayHour);
-        startCalendar.set(Calendar.MINUTE,
-                startCalendar.getMinimum(Calendar.MINUTE));
-        startCalendar.set(Calendar.HOUR_OF_DAY,
-                startCalendar.getMinimum(Calendar.HOUR_OF_DAY));
-
-        endCalendar.add(Calendar.HOUR_OF_DAY, startDayHour);
-        endCalendar.set(Calendar.MINUTE,
-                endCalendar.getMaximum(Calendar.MINUTE));
-        endCalendar.set(Calendar.HOUR_OF_DAY,
-                endCalendar.getMaximum(Calendar.HOUR_OF_DAY));
-
-        if (intervalType == WEEK_INTERVAL_TYPE) {
-            startCalendar.set(Calendar.DAY_OF_WEEK,
-                    startCalendar.getFirstDayOfWeek());
-
-        } else if (intervalType == MONTH_INTERVAL_TYPE) {
-            startCalendar.set(Calendar.DAY_OF_MONTH,
-                    startCalendar.getMinimum(Calendar.DAY_OF_MONTH));
+        INTERVAL_TYPE(int index) {
+            this.index = index;
         }
 
-        List<Date> dates = new ArrayList<Date>();
+        public int getIndex() {
+            return index;
+        }
+    }
 
-        while (startCalendar.before(endCalendar)) {
-            dates.add(startCalendar.getTime());
-            switch (intervalType) {
-                case DAY_INTERVAL_TYPE:
-                    startCalendar.add(Calendar.DAY_OF_MONTH, 1);
-                    break;
-                case WEEK_INTERVAL_TYPE:
-                    startCalendar.add(Calendar.WEEK_OF_YEAR, 1);
-                    break;
-                case MONTH_INTERVAL_TYPE:
-                    startCalendar.add(Calendar.MONTH, 1);
-                    break;
+    public static List<Interval> getDateIntervals(LocalDate start, LocalDate end,
+                                                  INTERVAL_TYPE intervalType) {
+
+        List<Interval> intervals = new ArrayList<>();
+
+        LocalDate startDate = start;
+        LocalDate endDate = end.plusDays(1);
+
+        if (intervalType == INTERVAL_TYPE.WEEKS) {
+            startDate = startDate.withDayOfWeek(DateTimeConstants.MONDAY);
+            endDate = endDate.plusWeeks(1).withDayOfWeek(DateTimeConstants.MONDAY);
+        } else if (intervalType == INTERVAL_TYPE.MONTHS) {
+            startDate = startDate.withDayOfMonth(1);
+            endDate = endDate.plusMonths(1).withDayOfMonth(1);
+        }
+
+        while (startDate.isBefore(endDate)) {
+
+            Interval interval;
+
+            if (intervalType == INTERVAL_TYPE.WEEKS) {
+                interval = startDate.toInterval().withPeriodAfterStart(Period.weeks(1).minusMinutes(1));
+                startDate = startDate.plusWeeks(1);
+            } else if (intervalType == INTERVAL_TYPE.MONTHS) {
+                interval = startDate.toInterval().withPeriodAfterStart(Period.months(1).minusMinutes(1));
+                startDate = startDate.plusMonths(1);
+            } else {
+                interval = startDate.toInterval().withPeriodAfterStart(Period.days(1).minusMinutes(1));
+                startDate = startDate.plusDays(1);
             }
+
+            intervals.add(interval);
         }
 
-        dates.add(startCalendar.getTime());
-
-        return dates;
+        return intervals;
     }
 
-    public static Pair<Date, Date> getInterval(List<Date> dates,
-                                               int intervalPosition) {
+    public static String getDateIntervalString(Interval interval) {
 
-        if ((intervalPosition - 1) < dates.size()) {
+        boolean sameMonth =
+                interval.getStart().getMonthOfYear() == interval.getEnd().getMonthOfYear();
 
-            return new Pair<Date, Date>(dates.get(intervalPosition), new Date(
-                    dates.get(intervalPosition + 1).getTime() - 10000));
-        }
-
-        return null;
-    }
-
-    public static boolean sameMonth(Pair<Date, Date> interval) {
-
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(interval.first);
-        int monthStart = cal.get(Calendar.MONTH);
-        cal.setTime(interval.second);
-        int monthEnd = cal.get(Calendar.MONTH);
-
-        return (monthStart == monthEnd);
-    }
-
-    public static String getDateIntervalString(List<Date> dates,
-                                               int intervalPosition) {
-
-        Pair<Date, Date> interval = getInterval(dates, intervalPosition);
-
-        boolean sameMonth = sameMonth(interval);
-
-        return (sameMonth ? weekDayFormat.format(interval.first)
-                : weekFormat.format(interval.first))
+        return (sameMonth ? weekDayFormat.print(interval.getStart())
+                : weekFormat.print(interval.getStart()))
                 + (sameMonth ? " - " : "\n")
-                + weekFormat.format(interval.second);
+                + weekFormat.print(interval.getEnd());
     }
 
-    public static Pair<Date, Date> getLimitDates(int intervalType) {
+    public static LocalDate getEndDate(LocalDate startDate, boolean weekend) {
+        return startDate.withDayOfWeek(weekend ?
+                DateTimeConstants.SUNDAY : DateTimeConstants.FRIDAY);
+    }
 
-        Calendar startCalendar = Calendar.getInstance();
-        Calendar endCalendar = Calendar.getInstance();
-
-        if (intervalType == MONTH_INTERVAL_TYPE) {
-
-            startCalendar.set(Calendar.DAY_OF_MONTH,
-                    startCalendar.getActualMinimum(Calendar.DAY_OF_MONTH));
-
-        } else if (intervalType == WEEK_INTERVAL_TYPE) {
-
-            startCalendar.set(Calendar.DAY_OF_WEEK,
-                    startCalendar.getFirstDayOfWeek());
+    public static Duration calculateDuration(WatchedLocationRecord record) {
+        Duration checkDuration = Duration.ZERO;
+        if (record.getCheckIn() != null) {
+            checkDuration = Duration.standardSeconds(
+                        Seconds.secondsBetween(record.getCheckIn(),
+                                record.isActive() ?
+                                        getCurrentDate() : record.getCheckOut()).getSeconds());
         }
+        return checkDuration;
+    }
 
-        startCalendar.set(Calendar.HOUR_OF_DAY,
-                startCalendar.getMinimum(Calendar.HOUR_OF_DAY));
-        startCalendar.set(Calendar.MINUTE,
-                startCalendar.getMinimum(Calendar.MINUTE));
-        startCalendar.set(Calendar.SECOND,
-                startCalendar.getMinimum(Calendar.SECOND));
-        startCalendar.set(Calendar.MILLISECOND,
-                startCalendar.getMinimum(Calendar.MILLISECOND));
-
-        if (intervalType == MONTH_INTERVAL_TYPE) {
-
-            endCalendar.set(Calendar.DAY_OF_MONTH,
-                    endCalendar.getActualMaximum(Calendar.DAY_OF_MONTH));
-
-        } else if (intervalType == WEEK_INTERVAL_TYPE) {
-
-            endCalendar.set(Calendar.DAY_OF_WEEK,
-                    (endCalendar.getMaximum(Calendar.DAY_OF_WEEK)));
-            endCalendar.add(
-                    Calendar.DAY_OF_MONTH,
-                    (endCalendar.getMaximum(Calendar.DAY_OF_WEEK) + endCalendar
-                            .getFirstDayOfWeek() - 1)
-                            % endCalendar.getMaximum(Calendar.DAY_OF_WEEK));
+    public static Duration calculateDuration(List<WatchedLocationRecord> records) {
+        Duration checksDuration = Duration.ZERO;
+        for(WatchedLocationRecord record : records) {
+            checksDuration = checksDuration.plus(calculateDuration(record));
         }
-
-        endCalendar.set(Calendar.HOUR_OF_DAY,
-                endCalendar.getMaximum(Calendar.HOUR_OF_DAY));
-        endCalendar.set(Calendar.MINUTE,
-                endCalendar.getMaximum(Calendar.MINUTE));
-        endCalendar.set(Calendar.SECOND,
-                endCalendar.getMaximum(Calendar.SECOND));
-        endCalendar.set(Calendar.MILLISECOND,
-                endCalendar.getMaximum(Calendar.MILLISECOND));
-
-        return new Pair<Date, Date>(startCalendar.getTime(),
-                endCalendar.getTime());
+        return checksDuration;
     }
 
-    public static long currentTimeMillis() {
-        return (((System.currentTimeMillis() + (Duration.MINS_PER_MILLISECOND / 2))
-                / Duration.MINS_PER_MILLISECOND) * Duration.MINS_PER_MILLISECOND);
+    public static String getDurationString (Duration duration) {
+        return durationFormat.print(duration.toPeriod());
     }
 
-    public static Date getCurrentDate() {
-        return new Date(currentTimeMillis());
+    public static LocalDateTime getCurrentDate() {
+        return LocalDateTime.now().minuteOfHour().roundFloorCopy();
     }
 
-    public static Date getDateStartDay() {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(getCurrentDate());
-        calendar.set(Calendar.HOUR, calendar.getMinimum(Calendar.HOUR));
-        calendar.set(Calendar.MINUTE, calendar.getMinimum(Calendar.MINUTE));
-        calendar.set(Calendar.SECOND, calendar.getMinimum(Calendar.SECOND));
-        return calendar.getTime();
-    }
-
-    public static Date getEndDate(Date startDate, boolean weekend) {
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(startDate);
-        cal.set(Calendar.DAY_OF_WEEK, cal.getFirstDayOfWeek() - 1);
-        //cal.add(Calendar.DAY_OF_WEEK, 1);
-        if (!weekend)
-            cal.add(Calendar.DAY_OF_WEEK, -2);
-        return cal.getTime();
+    public static long getCurrentDateMillis() {
+        return getCurrentDate().toDateTime().getMillis();
     }
 }

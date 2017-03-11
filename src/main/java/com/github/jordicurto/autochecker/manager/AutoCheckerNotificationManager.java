@@ -13,7 +13,7 @@ import com.github.jordicurto.autochecker.constants.AutoCheckerConstants;
 import com.github.jordicurto.autochecker.util.ContextKeeper;
 import com.github.jordicurto.autochecker.util.DateUtils;
 
-import java.util.Date;
+import org.joda.time.LocalDateTime;
 
 /**
  * Created by jordi on 12/10/16.
@@ -40,7 +40,7 @@ public class AutoCheckerNotificationManager extends ContextKeeper {
                                     mContext.getString(R.string.notification_title_leave))
                                     + " " + location.getName())
                     .setContentText(mContext.getString(R.string.notification_text) + " " +
-                            DateUtils.timeFormat.format(new Date(time)))
+                            DateUtils.timeFormat.print(new LocalDateTime(time)))
                     .setContentIntent(PendingIntent.getActivity(getContext(), 0,
                             new Intent(getContext(), AutoCheckerMainActivity.class),
                             PendingIntent.FLAG_UPDATE_CURRENT))

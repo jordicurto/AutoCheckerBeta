@@ -4,9 +4,7 @@ import android.view.View;
 
 import com.github.jordicurto.autochecker.R;
 import com.github.jordicurto.autochecker.data.model.WatchedLocationRecord;
-import com.github.jordicurto.autochecker.fragment.AutoCheckerWeekDayRecords;
 import com.github.jordicurto.autochecker.util.DateUtils;
-import com.github.jordicurto.autochecker.util.Duration;
 import com.github.mikephil.charting.charts.HorizontalBarChart;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
@@ -14,24 +12,25 @@ import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.formatter.YAxisValueFormatter;
 
+import org.joda.time.Duration;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
+import org.joda.time.LocalTime;
+
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
-import java.util.TimeZone;
 
 /**
  * Created by jordi on 13/02/17.
  */
 public class AutoCheckerWeekDayCharts {
 
-    private static final int GRAPH_DURATION_HOURS = 8 * Duration.HOURS_PER_MILLISECOND;
+    private static final int GRAPH_DURATION_HOURS = 8 * DateUtils.HOURS_PER_MILLISECOND;
+    private static final float MAX_GRAPH_VALUE =
+            GRAPH_DURATION_HOURS / DateUtils.MINS_PER_MILLISECOND;
 
-    private static final float MAX_GRAPH_VALUE = GRAPH_DURATION_HOURS / Duration.MINS_PER_MILLISECOND;
-
-    private long startDay = 0;
-    private long graphStart = 0;
-
+    private LocalDateTime graphStart;
 
     private enum PART_OF_DAY {
         MORNING(0),
@@ -64,25 +63,19 @@ public class AutoCheckerWeekDayCharts {
         configureCharts();
     }
 
-    public void updateRecords(AutoCheckerWeekDayRecords records) {
-
-        startDay = records.getWeekDay().getTime() / Duration.DAYS_PER_MILLISECOND;
-        graphStart = records.getWeekDay().getTime() % Duration.DAYS_PER_MILLISECOND;
-
-        setRecords(records.getRecords());
+    public void configureStartGraph(LocalDate weekDay, LocalTime startTime) {
+        graphStart = new LocalDateTime(weekDay.getYear(), weekDay.getMonthOfYear(),
+                weekDay.getDayOfMonth(), startTime.getHourOfDay(), startTime.getMinuteOfHour());
     }
 
-    private Calendar toDate(float value, PART_OF_DAY dayPart) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
-        calendar.setTimeInMillis(graphStart +
-                (Math.round(value) * Duration.MINS_PER_MILLISECOND) +
-                (GRAPH_DURATION_HOURS * dayPart.getIndex()));
-        return calendar;
+    private LocalDateTime toLocalTime(float value, PART_OF_DAY dayPart) {
+        return graphStart.plus(Duration.millis(
+                (Math.round(value) * DateUtils.MINS_PER_MILLISECOND) +
+                (GRAPH_DURATION_HOURS * dayPart.getIndex())));
     }
 
-    private float toValue(long milliseconds) {
-        return ((milliseconds - graphStart) *
+    private float toValue(LocalDateTime time) {
+        return ((time.toDateTime().getMillis() - graphStart.toDateTime().getMillis()) *
                 MAX_GRAPH_VALUE / GRAPH_DURATION_HOURS) % MAX_GRAPH_VALUE;
     }
 
@@ -101,7 +94,7 @@ public class AutoCheckerWeekDayCharts {
             chart.getAxisLeft().setValueFormatter(new YAxisValueFormatter() {
                 @Override
                 public String getFormattedValue(float value, YAxis yAxis) {
-                    return String.valueOf(toDate(value, dayPart).get(Calendar.HOUR_OF_DAY));
+                    return DateUtils.hourFormat.print(toLocalTime(value, dayPart));
                 }
             });
             chart.getAxisRight().setEnabled(true);
@@ -118,6 +111,7 @@ public class AutoCheckerWeekDayCharts {
 
     public void setRecords(List<WatchedLocationRecord> records) {
 
+        LocalDateTime downLimit, upLimit, checkIn, checkOut;
         long checkInMs, checkOutMs, downLimitMs, upLimitMs;
         int index = 0;
 
@@ -126,41 +120,35 @@ public class AutoCheckerWeekDayCharts {
             List<Float> steps = new ArrayList<>();
             float prevStep = 0;
 
-            downLimitMs = graphStart + (GRAPH_DURATION_HOURS * dayPart.getIndex());
-            upLimitMs = graphStart + (GRAPH_DURATION_HOURS * (dayPart.getIndex() + 1));
+            downLimit = graphStart.plus(Duration.millis(GRAPH_DURATION_HOURS * dayPart.getIndex()));
+            upLimit = downLimit.plus(Duration.millis(GRAPH_DURATION_HOURS));
 
             if (!records.isEmpty() && index < records.size()) {
 
                 do {
 
                     WatchedLocationRecord record = records.get(index++);
-                    long checkIn = record.getCheckIn().getTime();
-                    long checkOut = (record.isActive()) ?
-                            DateUtils.getCurrentDate().getTime() : record.getCheckOut().getTime();
-                    checkInMs = (checkIn % Duration.DAYS_PER_MILLISECOND) +
-                            ((checkIn / Duration.DAYS_PER_MILLISECOND) - startDay) *
-                                    Duration.DAYS_PER_MILLISECOND;
-                    checkOutMs = (checkOut % Duration.DAYS_PER_MILLISECOND) +
-                            ((checkOut / Duration.DAYS_PER_MILLISECOND) - startDay) *
-                                    Duration.DAYS_PER_MILLISECOND;
+                    checkIn = record.getCheckIn();
+                    checkOut = (record.isActive()) ?
+                            DateUtils.getCurrentDate() : record.getCheckOut();
 
-                    if (checkInMs < downLimitMs)
+                    if (checkIn.isBefore(downLimit))
                         steps.add(0f);
-                    else if (checkInMs < upLimitMs)
-                        steps.add(toValue(checkInMs) - prevStep);
+                    else if (checkIn.isBefore(upLimit))
+                        steps.add(toValue(checkIn) - prevStep);
 
                     if (!steps.isEmpty())
                         prevStep += steps.get(steps.size() - 1);
 
-                    if (checkOutMs > upLimitMs) {
+                    if (checkOut.isAfter(upLimit)) {
                         steps.add(MAX_GRAPH_VALUE);
                         index--;
                     } else
-                        steps.add(toValue(checkOutMs) - prevStep);
+                        steps.add(toValue(checkOut) - prevStep);
 
                     prevStep += steps.get(steps.size() - 1);
 
-                } while (index < records.size() && checkOutMs <= upLimitMs);
+                } while (index < records.size() && checkOut.isBefore(upLimit));
 
             }
 

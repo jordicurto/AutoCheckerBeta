@@ -2,9 +2,10 @@ package com.github.jordicurto.autochecker.fragment;
 
 import com.github.jordicurto.autochecker.data.model.WatchedLocationRecord;
 import com.github.jordicurto.autochecker.util.DateUtils;
-import com.github.jordicurto.autochecker.util.Duration;
 
-import java.util.Date;
+import org.joda.time.Duration;
+import org.joda.time.LocalDate;
+
 import java.util.List;
 
 /**
@@ -12,18 +13,18 @@ import java.util.List;
  */
 public class AutoCheckerWeekDayRecords {
 
-    private Date weekDay;
+    private LocalDate weekDay;
     private Duration duration;
     private List<WatchedLocationRecord> records;
 
-    public AutoCheckerWeekDayRecords(Date weekDay, List<WatchedLocationRecord> records) {
+    public AutoCheckerWeekDayRecords(LocalDate weekDay, List<WatchedLocationRecord> records) {
 
         this.weekDay = weekDay;
         this.records = records;
-        duration = Duration.calculateDuration(records);
+        duration = DateUtils.calculateDuration(records);
     }
 
-    public Date getWeekDay() {
+    public LocalDate getWeekDay() {
         return weekDay;
     }
 
@@ -32,11 +33,11 @@ public class AutoCheckerWeekDayRecords {
     }
 
     public String getWeekDayString() {
-        return DateUtils.dayFormat.format(weekDay);
+        return DateUtils.dayFormat.print(weekDay);
     }
 
     public String getDurationString() {
-        return duration.toString();
+        return DateUtils.getDurationString(duration);
     }
 
     public List<WatchedLocationRecord> getRecords() {

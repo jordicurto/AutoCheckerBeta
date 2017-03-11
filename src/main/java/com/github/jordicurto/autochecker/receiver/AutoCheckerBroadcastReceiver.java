@@ -86,7 +86,7 @@ public class AutoCheckerBroadcastReceiver extends BroadcastReceiver {
 
             } else {
 
-                long time = DateUtils.currentTimeMillis();
+                long time = DateUtils.getCurrentDateMillis();
 
                 Location triggerLocation = event.getTriggeringLocation();
 

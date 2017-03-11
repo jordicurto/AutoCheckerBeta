@@ -12,7 +12,8 @@ import android.widget.ViewSwitcher;
 import com.github.aakira.expandablelayout.ExpandableLinearLayout;
 import com.github.jordicurto.autochecker.R;
 import com.github.jordicurto.autochecker.fragment.AutoCheckerWeekDayRecords;
-import com.github.jordicurto.autochecker.interfaces.OnListFragmentInteractionListener;
+
+import org.joda.time.LocalTime;
 
 import java.util.List;
 import java.util.Vector;
@@ -21,12 +22,15 @@ public class AutoCheckerWeekRecordsAdapter extends
         RecyclerView.Adapter<AutoCheckerWeekRecordsAdapter.ViewHolder> {
 
     private List<AutoCheckerWeekDayRecords> mRecords;
+    private int mStartDayHour;
     private Vector<AutoCheckerWeekRecordsAdapter.ViewHolder> mViewHolders;
 
     private int mExpandedIndex = -1;
 
-    public AutoCheckerWeekRecordsAdapter(List<AutoCheckerWeekDayRecords> records) {
+    public AutoCheckerWeekRecordsAdapter(List<AutoCheckerWeekDayRecords> records,
+                                         int startDayHour) {
         mRecords = records;
+        mStartDayHour = startDayHour;
         mViewHolders = new Vector<>(mRecords.size());
     }
 
@@ -39,8 +43,10 @@ public class AutoCheckerWeekRecordsAdapter extends
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, final int position) {
-        //final int  pos = position;
+
         mViewHolders.add(position, holder);
+        holder.mCharts.configureStartGraph(
+                mRecords.get(position).getWeekDay(), new LocalTime(mStartDayHour, 0));
         holder.updateRecordDuration(position);
         holder.setIsRecyclable(false);
         holder.mExpandableLinearLayout.setInRecyclerView(true);
@@ -116,7 +122,7 @@ public class AutoCheckerWeekRecordsAdapter extends
             AutoCheckerWeekDayRecords records = mRecords.get(position);
             mDayText.setText(records.getWeekDayString());
             mDurationText.setText(records.getDurationString());
-            mCharts.updateRecords(records);
+            mCharts.setRecords(records.getRecords());
         }
 
         public View getView() {

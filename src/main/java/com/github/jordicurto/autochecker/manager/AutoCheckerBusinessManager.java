@@ -3,7 +3,6 @@ package com.github.jordicurto.autochecker.manager;
 import android.content.Context;
 import android.database.SQLException;
 import android.util.Log;
-import android.util.Pair;
 
 import com.github.jordicurto.autochecker.data.AutoCheckerDataSource;
 import com.github.jordicurto.autochecker.data.exception.NoLocationFoundException;
@@ -12,9 +11,10 @@ import com.github.jordicurto.autochecker.data.model.WatchedLocation;
 import com.github.jordicurto.autochecker.data.model.WatchedLocationRecord;
 import com.github.jordicurto.autochecker.util.DateUtils;
 
+import org.joda.time.Interval;
+import org.joda.time.LocalDateTime;
+
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -103,7 +103,8 @@ public class AutoCheckerBusinessManager {
         return (getWatchedLocation(locationName) != null);
     }
 
-    public WatchedLocationRecord createCheckInRecord(WatchedLocation location, Date checkIn) {
+    public WatchedLocationRecord createCheckInRecord(WatchedLocation location,
+                                                     LocalDateTime checkIn) {
 
         WatchedLocationRecord record = new WatchedLocationRecord();
 
@@ -144,7 +145,8 @@ public class AutoCheckerBusinessManager {
         return record;
     }
 
-    public WatchedLocationRecord updateCheckOutRecord(WatchedLocation location, Date checkOut) {
+    public WatchedLocationRecord updateCheckOutRecord(WatchedLocation location,
+                                                      LocalDateTime checkOut) {
 
         WatchedLocationRecord record = new WatchedLocationRecord();
 
@@ -176,7 +178,7 @@ public class AutoCheckerBusinessManager {
             dataSource.close();
 
         } catch (NoRecordFoundException e) {
-            Log.e(TAG, "Record not found execption", e);
+            Log.e(TAG, "Record not found exception", e);
         } catch (SQLException e) {
             Log.e(TAG, "DataSource exception", e);
         } finally {
@@ -186,22 +188,18 @@ public class AutoCheckerBusinessManager {
         return record;
     }
 
-    public List<Date> getDateIntervals(WatchedLocation location, int startDayHour, int intervalType) {
+    public List<Interval> getDateIntervals(WatchedLocation location,
+                                       DateUtils.INTERVAL_TYPE intervalType) {
 
-        List<Date> intervals = new ArrayList<>();
+        List<Interval> intervals = new ArrayList<>();
 
         try {
 
             dataSource.open();
 
-            Pair<Date, Date> limits = dataSource.getLimitDates(location);
-
-            if (limits.first != null) {
-
-                intervals = DateUtils.getDateIntervals(limits.first, DateUtils.getCurrentDate(),
-                        -startDayHour, intervalType);
-
-            }
+            intervals = DateUtils.getDateIntervals(
+                    dataSource.getLimitDates(location).getStart().toLocalDate(),
+                    DateUtils.getCurrentDate().toLocalDate(), intervalType);
 
         } catch (SQLException e) {
             Log.e(TAG, "DataSource exception", e);
@@ -229,14 +227,14 @@ public class AutoCheckerBusinessManager {
     }
 
     public List<WatchedLocationRecord> getIntervalWatchedLocationRecord(WatchedLocation location,
-                                                                        Date start, Date end) {
+                                                                        Interval interval, int startHourDay) {
 
         List<WatchedLocationRecord> records = new ArrayList<WatchedLocationRecord>();
 
         try {
 
             dataSource.open();
-            records = dataSource.getIntervalWatchedLocationRecord(location, start, end);
+            records = dataSource.getIntervalWatchedLocationRecord(location, interval, startHourDay);
             dataSource.close();
 
         } catch (SQLException e) {
