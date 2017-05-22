@@ -4,6 +4,7 @@ import com.github.jordicurto.autochecker.data.model.WatchedLocationRecord;
 import com.github.jordicurto.autochecker.util.DateUtils;
 
 import org.joda.time.Duration;
+import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 
 import java.util.List;
@@ -15,13 +16,14 @@ public class AutoCheckerWeekDayRecords {
 
     private LocalDate weekDay;
     private Duration duration;
-    private List<WatchedLocationRecord> records;
+    private List<WatchedLocationRecord> mRecords;
 
-    public AutoCheckerWeekDayRecords(LocalDate weekDay, List<WatchedLocationRecord> records) {
+    public AutoCheckerWeekDayRecords(Interval interval, int startHourDay,
+                                     List<WatchedLocationRecord> records) {
 
-        this.weekDay = weekDay;
-        this.records = records;
-        duration = DateUtils.calculateDuration(records);
+        mRecords = records;
+        weekDay = interval.getStart().toLocalDate();
+        duration = DateUtils.calculateDuration(records, interval, startHourDay);
     }
 
     public LocalDate getWeekDay() {
@@ -41,6 +43,6 @@ public class AutoCheckerWeekDayRecords {
     }
 
     public List<WatchedLocationRecord> getRecords() {
-        return records;
+        return mRecords;
     }
 }

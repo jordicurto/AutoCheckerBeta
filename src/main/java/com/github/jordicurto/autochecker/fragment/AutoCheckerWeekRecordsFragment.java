@@ -1,6 +1,7 @@
 package com.github.jordicurto.autochecker.fragment;
 
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -10,12 +11,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.bignerdranch.expandablerecyclerview.ExpandableRecyclerAdapter;
 import com.github.jordicurto.autochecker.R;
 import com.github.jordicurto.autochecker.adapter.AutoCheckerWeekRecordsAdapter;
+import com.github.jordicurto.autochecker.adapter.erecyclerview.AutoCheckerDayRecords;
+import com.github.jordicurto.autochecker.adapter.erecyclerview.AutoCheckerDayRecordsAdapter;
 import com.github.jordicurto.autochecker.data.model.WatchedLocation;
 import com.github.jordicurto.autochecker.data.model.WatchedLocationRecord;
 import com.github.jordicurto.autochecker.manager.AutoCheckerBusinessManager;
 import com.github.jordicurto.autochecker.util.DateUtils;
+import com.github.jordicurto.autochecker.util.DividerItemDecoration;
 
 import org.joda.time.Duration;
 import org.joda.time.Interval;
@@ -88,7 +93,7 @@ public class AutoCheckerWeekRecordsFragment extends Fragment {
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
-
+        recyclerView.addItemDecoration(new DividerItemDecoration(getContext()));
         return view;
     }
 
@@ -96,7 +101,8 @@ public class AutoCheckerWeekRecordsFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
-        List<AutoCheckerWeekDayRecords> rows = new ArrayList<>();
+        //List<AutoCheckerWeekDayRecords> rows = new ArrayList<>();
+        List<AutoCheckerDayRecords> rows = new ArrayList<>();
         Duration totalDuration = Duration.ZERO;
 
         AutoCheckerBusinessManager manager = AutoCheckerBusinessManager.getManager(getContext());
@@ -106,10 +112,13 @@ public class AutoCheckerWeekRecordsFragment extends Fragment {
             List<WatchedLocationRecord> records = manager.
                     getIntervalWatchedLocationRecord(location, weekDays.get(i), startHourDay);
 
-            if (weekDays.get(i).getStart().toLocalDateTime().isBefore
-                    (DateUtils.getCurrentDate())) {
-                AutoCheckerWeekDayRecords row =
-                        new AutoCheckerWeekDayRecords(weekDays.get(i).getStart().toLocalDate(), records);
+            if (weekDays.get(i).getStart().plusHours(startHourDay).toLocalDateTime()
+                    .isBefore(DateUtils.getCurrentDate())) {
+
+                AutoCheckerDayRecords row =
+                        new AutoCheckerDayRecords(weekDays.get(i), startHourDay, records);
+                /*AutoCheckerWeekDayRecords row =
+                        new AutoCheckerWeekDayRecords(weekDays.get(i), startHourDay, records); */
                 totalDuration = totalDuration.plus(row.getDuration());
                 rows.add(row);
             }
@@ -117,6 +126,8 @@ public class AutoCheckerWeekRecordsFragment extends Fragment {
         
         totalDurationText.setText(DateUtils.getDurationString(totalDuration));
 
-        recyclerView.setAdapter(new AutoCheckerWeekRecordsAdapter(rows, startHourDay));
+        //recyclerView.setAdapter(new AutoCheckerWeekRecordsAdapter(rows, startHourDay));
+        recyclerView.setAdapter(new AutoCheckerDayRecordsAdapter(getContext(), rows));
     }
+
 }

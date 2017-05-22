@@ -22,5 +22,10 @@
     <string name="notification_text">Event registered at </string>
     <string name="title_activity_auto_checker_main">AutoCheckerMainActivity</string>
     <string name="inside_outside_menu">Are you inside?</string>
-
+    <string name="request_permission_title">Permissions request</string>
+    <string name="request_permission_text">Application needs permissions to run.</string>
+    <string name="notification_register_geofence_title"></string>
+    <string name="notification_register_geofence_text"></string>
+    <string name="title_activity_auto_checker_settings">Settings</string>
+    
 </resources>

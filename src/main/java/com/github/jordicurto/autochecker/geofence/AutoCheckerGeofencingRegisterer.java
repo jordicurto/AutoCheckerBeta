@@ -6,8 +6,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.github.jordicurto.autochecker.activity.AutoCheckerMainActivity;
 import com.github.jordicurto.autochecker.data.model.WatchedLocation;
 import com.github.jordicurto.autochecker.constants.AutoCheckerConstants;
+import com.github.jordicurto.autochecker.manager.AutoCheckerNotificationManager;
 import com.github.jordicurto.autochecker.util.ContextKeeper;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -30,6 +32,8 @@ public class AutoCheckerGeofencingRegisterer extends ContextKeeper
     private GoogleApiClient mGoogleApiClient;
     private PendingIntent mGeofencePendingIntent;
     private List<Geofence> geofencesToAdd = new ArrayList<>();
+
+    private AutoCheckerNotificationManager nManager;
 
     public final String TAG = getClass().getSimpleName();
 
@@ -65,12 +69,15 @@ public class AutoCheckerGeofencingRegisterer extends ContextKeeper
         try {
             mGeofencePendingIntent = createRequestPendingIntent();
             GeofencingRequest request = new GeofencingRequest.Builder().addGeofences(geofencesToAdd).build();
-            PendingResult<Status> result = LocationServices.GeofencingApi.addGeofences(mGoogleApiClient, request,
+            final PendingResult<Status> result = LocationServices.GeofencingApi.addGeofences(mGoogleApiClient, request,
                     mGeofencePendingIntent);
             result.setResultCallback(new ResultCallback<Status>() {
                 @Override
                 public void onResult(Status status) {
                     if (status.isSuccess()) {
+                        if (nManager == null)
+                            nManager = new AutoCheckerNotificationManager(getContext());
+                        nManager.notifyRegisteredGeofence();
                         Log.i(TAG, "Registering successful");
                     } else {
                         Log.e(TAG, "Registering failed: " + getErrorString(status.getStatusCode()));

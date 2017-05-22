@@ -12,7 +12,7 @@
     <dimen name="hours_record_dim">8pt</dimen>
     <dimen name="total_hours_dim">18pt</dimen>
     <dimen name="total_hours_day_dim">14pt</dimen>
-    <dimen name="total_text_dim">11pt</dimen>
+    <dimen name="total_text_dim">16pt</dimen>
     <dimen name="check_hour_dim">10pt</dimen>
 
 </resources>

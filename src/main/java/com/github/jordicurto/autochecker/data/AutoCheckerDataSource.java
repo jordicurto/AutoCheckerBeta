@@ -246,7 +246,9 @@ public class AutoCheckerDataSource {
 				AutoCheckerSQLiteOpenHelper.COLUMNS_TABLE_RECORDS,
 				AutoCheckerSQLiteOpenHelper.COLUMN_LOCATION_ID + " = " + location.getId() + " and "
 						+ AutoCheckerSQLiteOpenHelper.COLUMN_CHECKIN + " between "
-                        + start.getMillis() + " and " + end.getMillis(),
+                        + start.getMillis() + " and " + end.getMillis() + " or "
+						+ AutoCheckerSQLiteOpenHelper.COLUMN_CHECKOUT + " between "
+						+ start.getMillis() + " and " + end.getMillis(),
 				null, null, null, AutoCheckerSQLiteOpenHelper.COLUMN_CHECKIN + " asc");
 
 		List<WatchedLocationRecord> records = new ArrayList<WatchedLocationRecord>();
@@ -254,7 +256,8 @@ public class AutoCheckerDataSource {
 		while (cursor.moveToNext()) {
 			WatchedLocationRecord record = new WatchedLocationRecord();
 			setWatchedLocationRecordContents(cursor, record, location);
-			records.add(record);
+			if (record.isValid())
+				records.add(record);
 		}
 
 		cursor.close();

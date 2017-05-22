@@ -54,4 +54,6 @@ public class WatchedLocationRecord implements Serializable {
         return checkIn != null && checkOut == null;
     }
 
+    public boolean isValid() { return isActive() || checkIn.isBefore(checkOut); }
+
 }

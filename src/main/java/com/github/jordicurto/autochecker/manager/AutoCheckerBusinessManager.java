@@ -189,7 +189,8 @@ public class AutoCheckerBusinessManager {
     }
 
     public List<Interval> getDateIntervals(WatchedLocation location,
-                                       DateUtils.INTERVAL_TYPE intervalType) {
+                                           DateUtils.INTERVAL_TYPE intervalType,
+                                           int startDayHour) {
 
         List<Interval> intervals = new ArrayList<>();
 
@@ -199,7 +200,7 @@ public class AutoCheckerBusinessManager {
 
             intervals = DateUtils.getDateIntervals(
                     dataSource.getLimitDates(location).getStart().toLocalDate(),
-                    DateUtils.getCurrentDate().toLocalDate(), intervalType);
+                    DateUtils.getCurrentDate().minusHours(startDayHour).toLocalDate(), intervalType);
 
         } catch (SQLException e) {
             Log.e(TAG, "DataSource exception", e);

@@ -23,5 +23,9 @@
     <string name="notification_text">S\'ha registrat l\'event a les</string>
 
     <string name="inside_outside_menu">Esteu dins?</string>
+    <string name="request_permission_title" />
+    <string name="request_permission_text" />
+    <string name="notification_register_geofence_title" />
+    <string name="notification_register_geofence_text" />
 
 </resources>

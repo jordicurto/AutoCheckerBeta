@@ -24,6 +24,19 @@ public class AutoCheckerNotificationManager extends ContextKeeper {
         super(context);
     }
 
+    private Notification buildNotification(int smallIcon, String title, String text) {
+
+        return new Notification.Builder(mContext)
+                .setSmallIcon(smallIcon)
+                .setContentTitle(title)
+                .setContentText(text)
+                .setContentIntent(PendingIntent.getActivity(mContext, 0,
+                        new Intent(mContext, AutoCheckerMainActivity.class),
+                        PendingIntent.FLAG_UPDATE_CURRENT))
+                .setAutoCancel(true)
+                .build();
+    }
+
     public void notifyTransition(WatchedLocation location, long time) {
 
         NotificationManager nManager = (NotificationManager) mContext
@@ -31,25 +44,36 @@ public class AutoCheckerNotificationManager extends ContextKeeper {
 
         if (nManager != null) {
 
-            Notification notification = new Notification.Builder(mContext)
-                    .setSmallIcon(location.getStatus() == WatchedLocation.INSIDE_LOCATION ?
-                            R.drawable.ic_enter_notification : R.drawable.ic_exit_notification)
-                    .setContentTitle(
-                            (location.getStatus() == WatchedLocation.INSIDE_LOCATION ?
-                                    mContext.getString(R.string.notification_title_enter) :
-                                    mContext.getString(R.string.notification_title_leave))
-                                    + " " + location.getName())
-                    .setContentText(mContext.getString(R.string.notification_text) + " " +
-                            DateUtils.timeFormat.print(new LocalDateTime(time)))
-                    .setContentIntent(PendingIntent.getActivity(getContext(), 0,
-                            new Intent(getContext(), AutoCheckerMainActivity.class),
-                            PendingIntent.FLAG_UPDATE_CURRENT))
-                    .setAutoCancel(true)
-                    .build();
+            Notification notification = buildNotification(
+                    location.getStatus() == WatchedLocation.INSIDE_LOCATION ?
+                    R.drawable.ic_enter_notification : R.drawable.ic_exit_notification,
+                    (location.getStatus() == WatchedLocation.INSIDE_LOCATION ?
+                            mContext.getString(R.string.notification_title_enter) :
+                            mContext.getString(R.string.notification_title_leave))
+                            + " " + location.getName(),
+                    mContext.getString(R.string.notification_text) + " " +
+                            DateUtils.timeFormat.print(new LocalDateTime(time)));
 
             nManager.notify((location.getStatus() == WatchedLocation.INSIDE_LOCATION ?
-                    AutoCheckerConstants.TRANSTION_ENTER_NOTIFICATION_ID :
-                    AutoCheckerConstants.TRANSTION_LEAVE_NOTIFICATION_ID) , notification);
+                    AutoCheckerConstants.NOTIFICATION_TRANSITION_ENTER_ID :
+                    AutoCheckerConstants.NOTIFICATION_TRANSITION_LEAVE_ID) , notification);
         }
     }
+
+    public void notifyRegisteredGeofence() {
+
+        NotificationManager nManager = (NotificationManager) mContext
+                .getSystemService(Context.NOTIFICATION_SERVICE);
+
+        if (nManager != null) {
+
+            Notification notification = buildNotification(
+                    R.drawable.ic_notification_register_geofence,
+                    mContext.getString(R.string.notification_register_geofence_title),
+                    mContext.getString(R.string.notification_register_geofence_text));
+
+            nManager.notify(AutoCheckerConstants.NOTIFICATION_REGISTER_GEOFENCE_ID, notification);
+        }
+    }
+
 }

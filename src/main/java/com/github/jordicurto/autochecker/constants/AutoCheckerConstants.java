@@ -7,9 +7,7 @@ import org.joda.time.DateTimeConstants;
 
 public class AutoCheckerConstants {
 
-	public static final String PREF_TEST = "test";
-
-	public static final String FIRST_RUN = "FIRST_RUN";
+	public static final String INSTALL_TIME = "INSTALL_TIME";
 	public static final String CURRENT_LOCATION_ID = "CURRENT_LOCATION_ID";
 	public static final String PREF_START_DAY_HOUR = "PREF_START_DAY_HOUR";
 	public static final String PREF_SHOW_WEEKENDS = "PREF_SHOW_WEEKENDS";
@@ -22,19 +20,26 @@ public class AutoCheckerConstants {
 
     public static final String GEOFENCE_TRANSITION_RECEIVED = "GEOFENCE_TRANSITION_RECEIVED";
 	public static final String GEOFENCE_TRANSITION_CONFIRM_RECEIVED = "GEOFENCE_TRANSITION_CONFIRM_RECEIVED";
+    public static final String INTENT_ACTIVITY_RELOAD_REQUEST = "INTENT_ACTIVITY_RELOAD_REQUEST";
+
     public static final String ALARM_NOTIFICATION_DURATION = "ALARM_NOTIFICATION_DURATION";
 
-    public final static String LOCATIONS_ACTIVITY_FIRST_RUN = "LOCATIONS_ACTIVITY_FIRST_RUN";
-
-    public final static String TRANSITION_RECEIVED = "TRANSITION_RECEIVED";
+    public final static String INTENT_REQUEST_REGISTER_GEOFENCES = "INTENT_REQUEST_REGISTER_GEOFENCES";
+    public final static String INTENT_PERMISSION_GRANTED = "INTENT_PERMISSION_GRANTED";
 
     public static final String LOCATION_ID = "LOCATION_ID";
 	public static final String TRANSITION_TIME = "TRANSITION_TIME";
 	public static final String TRANSITION_DIRECTION = "TRANSITION_DIRECTION";
 
-    public static final int TRANSTION_ENTER_NOTIFICATION_ID = 100;
-	public static final int TRANSTION_LEAVE_NOTIFICATION_ID = 200;
+    public static final int NOTIFICATION_TRANSITION_ENTER_ID = 10;
+	public static final int NOTIFICATION_TRANSITION_LEAVE_ID = 20;
+    public static final int NOTIFICATION_REGISTER_GEOFENCE_ID = 30;
 
     public static final int DEFAULT_START_DAY_HOUR = 6;
+    public static final int HOURS_BETWEEN_DAY_PART = 8;
 
+    public static final String KEY_PERMISSIONS = "KEY_PERMISSIONS";
+    public static final String KEY_GRANT_RESULTS = "KEY_GRANT_RESULTS";
+    public static final String KEY_RESULT_RECEIVER = "KEY_RESULT_RECEIVER";
+    public static final String KEY_REQUEST_CODE = "KEY_REQUEST_CODE";
 }

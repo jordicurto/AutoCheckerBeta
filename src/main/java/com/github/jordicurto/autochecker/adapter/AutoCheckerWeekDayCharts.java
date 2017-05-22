@@ -6,6 +6,7 @@ import com.github.jordicurto.autochecker.R;
 import com.github.jordicurto.autochecker.data.model.WatchedLocationRecord;
 import com.github.jordicurto.autochecker.util.DateUtils;
 import com.github.mikephil.charting.charts.HorizontalBarChart;
+import com.github.mikephil.charting.components.LimitLine;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
@@ -51,10 +52,10 @@ public class AutoCheckerWeekDayCharts {
     private HashMap<PART_OF_DAY, HorizontalBarChart> charts = new HashMap<>();
     private int[] colors = new int[2];
 
-    public AutoCheckerWeekDayCharts (View view) {
+    public AutoCheckerWeekDayCharts(View view) {
 
-        colors[0] = view.getContext().getResources().getColor(R.color.colorOutLocation);
-        colors[1] = view.getContext().getResources().getColor(R.color.colorInLocation);
+        colors[0] = view.getContext().getResources().getColor(R.color.colorPrimaryLight);
+        colors[1] = view.getContext().getResources().getColor(R.color.colorPrimary);
 
         charts.put(PART_OF_DAY.MORNING, (HorizontalBarChart) view.findViewById(R.id.graphMorning));
         charts.put(PART_OF_DAY.EVENING, (HorizontalBarChart) view.findViewById(R.id.graphEvening));
@@ -71,7 +72,7 @@ public class AutoCheckerWeekDayCharts {
     private LocalDateTime toLocalTime(float value, PART_OF_DAY dayPart) {
         return graphStart.plus(Duration.millis(
                 (Math.round(value) * DateUtils.MINS_PER_MILLISECOND) +
-                (GRAPH_DURATION_HOURS * dayPart.getIndex())));
+                        (GRAPH_DURATION_HOURS * dayPart.getIndex())));
     }
 
     private float toValue(LocalDateTime time) {
@@ -106,16 +107,19 @@ public class AutoCheckerWeekDayCharts {
             chart.setDrawGridBackground(false);
             chart.setDragEnabled(false);
             chart.setScaleEnabled(false);
+            chart.setDescription("");
         }
     }
 
     public void setRecords(List<WatchedLocationRecord> records) {
 
+        final LocalDateTime now = DateUtils.getCurrentDate();
         LocalDateTime downLimit, upLimit, checkIn, checkOut;
-        long checkInMs, checkOutMs, downLimitMs, upLimitMs;
         int index = 0;
 
-        for (PART_OF_DAY dayPart : PART_OF_DAY.values()) {
+        for (final PART_OF_DAY dayPart : PART_OF_DAY.values()) {
+
+            HorizontalBarChart chart = charts.get(dayPart);
 
             List<Float> steps = new ArrayList<>();
             float prevStep = 0;
@@ -129,8 +133,7 @@ public class AutoCheckerWeekDayCharts {
 
                     WatchedLocationRecord record = records.get(index++);
                     checkIn = record.getCheckIn();
-                    checkOut = (record.isActive()) ?
-                            DateUtils.getCurrentDate() : record.getCheckOut();
+                    checkOut = (record.isActive()) ? now : record.getCheckOut();
 
                     if (checkIn.isBefore(downLimit))
                         steps.add(0f);
@@ -152,28 +155,49 @@ public class AutoCheckerWeekDayCharts {
 
             }
 
-            if (!steps.isEmpty() && steps.get(steps.size() - 1) < MAX_GRAPH_VALUE)
-                steps.add(MAX_GRAPH_VALUE);
-
-            float[] stepArray = new float[steps.size()];
-
-            int i = 0;
-            for (Float step : steps) {
-                stepArray[i++] = step;
+            if (steps.isEmpty() || steps.get(steps.size() - 1) < MAX_GRAPH_VALUE) {
+                if (downLimit.isBefore(now)) {
+                    if (upLimit.isAfter(now)) {
+                        steps.add(toValue(now) - prevStep);
+                    } else {
+                        steps.add(MAX_GRAPH_VALUE);
+                    }
+                }
             }
 
-            List<BarEntry> yValues = new ArrayList<>();
-            yValues.add(new BarEntry(stepArray, 0, dayPart.name()));
-            BarDataSet dataSet = new BarDataSet(yValues, dayPart.name());
-            dataSet.setColors(colors);
-            dataSet.setDrawValues(false);
-            BarData data = new BarData(new String[]{dayPart.name()}, dataSet);
-            data.setDrawValues(false);
-            data.setHighlightEnabled(false);
+            if (!steps.isEmpty()) {
 
-            charts.get(dayPart).setData(data);
-            charts.get(dayPart).notifyDataSetChanged();
-            charts.get(dayPart).invalidate();
+                float[] stepArray = new float[steps.size()];
+                int stepSum = 0;
+                YAxis yaxis = chart.getAxisLeft();
+
+                for (int i = 0; i < steps.size(); i++) {
+                    stepArray[i] = steps.get(i);
+                    stepSum += stepArray[i];
+                    if (stepSum > 0 && stepSum < MAX_GRAPH_VALUE && i < (steps.size() - 1)) {
+                        LimitLine lm = new LimitLine(stepSum,
+                                //DateUtils.timeFormat.print(toLocalTime(stepSum, dayPart)));
+                                "");
+                        yaxis.addLimitLine(lm);
+                    }
+                }
+
+                List<BarEntry> yValues = new ArrayList<>();
+                yValues.add(new BarEntry(stepArray, 0, dayPart.name()));
+                BarDataSet dataSet = new BarDataSet(yValues, dayPart.name());
+                dataSet.setColors(colors);
+                dataSet.setDrawValues(false);
+                BarData data = new BarData(new String[]{dayPart.name()}, dataSet);
+                data.setDrawValues(false);
+                data.setHighlightEnabled(false);
+
+                chart.setData(data);
+                chart.notifyDataSetChanged();
+                chart.invalidate();
+
+            } else {
+                chart.setVisibility(View.INVISIBLE);
+            }
         }
     }
 }

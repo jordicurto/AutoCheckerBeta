@@ -1,14 +1,17 @@
 package com.github.jordicurto.autochecker.adapter;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageSwitcher;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.ViewSwitcher;
 
+import com.github.aakira.expandablelayout.ExpandableLayoutListenerAdapter;
 import com.github.aakira.expandablelayout.ExpandableLinearLayout;
 import com.github.jordicurto.autochecker.R;
 import com.github.jordicurto.autochecker.fragment.AutoCheckerWeekDayRecords;
@@ -16,79 +19,59 @@ import com.github.jordicurto.autochecker.fragment.AutoCheckerWeekDayRecords;
 import org.joda.time.LocalTime;
 
 import java.util.List;
-import java.util.Vector;
 
 public class AutoCheckerWeekRecordsAdapter extends
         RecyclerView.Adapter<AutoCheckerWeekRecordsAdapter.ViewHolder> {
 
     private List<AutoCheckerWeekDayRecords> mRecords;
     private int mStartDayHour;
-    private Vector<AutoCheckerWeekRecordsAdapter.ViewHolder> mViewHolders;
-
-    private int mExpandedIndex = -1;
+    private SparseBooleanArray mExpandState = new SparseBooleanArray();
 
     public AutoCheckerWeekRecordsAdapter(List<AutoCheckerWeekDayRecords> records,
                                          int startDayHour) {
         mRecords = records;
         mStartDayHour = startDayHour;
-        mViewHolders = new Vector<>(mRecords.size());
+        for (int i = 0; i < mRecords.size(); i++)
+            mExpandState.append(i, false);
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
+        final View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.fragment_auto_checker_day_records, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, final int position) {
-
-        mViewHolders.add(position, holder);
+        AutoCheckerWeekDayRecords records = mRecords.get(position);
         holder.mCharts.configureStartGraph(
-                mRecords.get(position).getWeekDay(), new LocalTime(mStartDayHour, 0));
-        holder.updateRecordDuration(position);
+                records.getWeekDay(), new LocalTime(mStartDayHour, 0));
+        holder.updateRecordDuration(records);
         holder.setIsRecyclable(false);
         holder.mExpandableLinearLayout.setInRecyclerView(true);
+        holder.mExpandableLinearLayout.setExpanded(mExpandState.get(position));
+        holder.mImageExpand.setRotation(mExpandState.get(position) ? 180f : 0f);
+        holder.mExpandableLinearLayout.setListener(new ExpandableLayoutListenerAdapter() {
+
+            @Override
+            public void onPreOpen() {
+                mExpandState.put(holder.getAdapterPosition(), true);
+                holder.expandIcon();
+            }
+
+            @Override
+            public void onPreClose() {
+                mExpandState.put(holder.getAdapterPosition(), false);
+                holder.collapseIcon();
+            }
+        });
         holder.getView().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                if (mExpandedIndex == -1) {
-                    expandViewHolder(holder);
-                    mExpandedIndex = holder.getAdapterPosition();
-                } else {
-                    if (mExpandedIndex != holder.getAdapterPosition()) {
-                        collapseViewHolder(mViewHolders.get(mExpandedIndex));
-                        expandViewHolder(holder);
-                        mExpandedIndex = holder.getAdapterPosition();
-                    } else {
-                        collapseViewHolder(holder);
-                        mExpandedIndex = -1;
-                    }
+                if (holder.mExpandableLinearLayout.getVisibility() == View.VISIBLE) {
+                    holder.mExpandableLinearLayout.toggle();
                 }
-            }
-
-            private void expandViewHolder(ViewHolder holder) {
-                holder.mImageSwitcher.setImageResource(R.drawable.ic_collapse);
-                holder.mExpandableLinearLayout.expand();
-            }
-
-            private void collapseViewHolder(ViewHolder holder) {
-                holder.mImageSwitcher.setImageResource(R.drawable.ic_expand);
-                holder.mExpandableLinearLayout.collapse();
-            }
-        });
-        holder.mImageSwitcher.setFactory(new ViewSwitcher.ViewFactory() {
-            @Override
-            public View makeView() {
-                ImageView myView = new ImageView(holder.getView().getContext());
-                myView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-                myView.setLayoutParams(new
-                        ImageSwitcher.LayoutParams(ImageSwitcher.LayoutParams.WRAP_CONTENT,
-                        ImageSwitcher.LayoutParams.WRAP_CONTENT));
-                myView.setImageResource(R.drawable.ic_expand);
-                return myView;
             }
         });
     }
@@ -102,27 +85,43 @@ public class AutoCheckerWeekRecordsAdapter extends
         private final View mView;
         private final TextView mDayText;
         private final TextView mDurationText;
-        private final ImageSwitcher mImageSwitcher;
+        private final ImageView mImageExpand;
         private final ExpandableLinearLayout mExpandableLinearLayout;
         private final AutoCheckerWeekDayCharts mCharts;
+        private final Animation expandAnim, collapseAnim;
 
         public ViewHolder(final View view) {
             super(view);
             mView = view;
             mDayText = (TextView) view.findViewById(R.id.week_day);
             mDurationText = (TextView) view.findViewById(R.id.day_record_duration);
-            mImageSwitcher = (ImageSwitcher) view.findViewById(R.id.expand_collapse_icon);
+            mImageExpand = (ImageView) view.findViewById(R.id.expand_collapse);
             mExpandableLinearLayout =
-                   (ExpandableLinearLayout) view.findViewById(R.id.expand_usage_graphs);
+                    (ExpandableLinearLayout) view.findViewById(R.id.expand_usage_graphs);
             mExpandableLinearLayout.initLayout();
             mCharts = new AutoCheckerWeekDayCharts(view);
+            expandAnim = AnimationUtils.loadAnimation(view.getContext(), R.anim.anim_expand);
+            collapseAnim = AnimationUtils.loadAnimation(view.getContext(), R.anim.anim_collapse);
         }
 
-        public void updateRecordDuration(int position) {
-            AutoCheckerWeekDayRecords records = mRecords.get(position);
+        public void updateRecordDuration(AutoCheckerWeekDayRecords records) {
             mDayText.setText(records.getWeekDayString());
             mDurationText.setText(records.getDurationString());
-            mCharts.setRecords(records.getRecords());
+            if(records.getRecords().isEmpty()) {
+                mExpandableLinearLayout.setVisibility(View.INVISIBLE);
+                mImageExpand.setVisibility(View.INVISIBLE);
+            } else {
+                mExpandableLinearLayout.setVisibility(View.VISIBLE);
+                mCharts.setRecords(records.getRecords());
+            }
+        }
+
+        public void expandIcon() {
+            mImageExpand.startAnimation(expandAnim);
+        }
+
+        public void collapseIcon() {
+            mImageExpand.startAnimation(collapseAnim);
         }
 
         public View getView() {

@@ -1,10 +1,18 @@
 package com.github.jordicurto.autochecker.activity;
 
+import android.Manifest;
+import android.app.AlarmManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
@@ -28,10 +36,11 @@ import org.joda.time.Interval;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
 
-public class AutoCheckerMainActivity extends AppCompatActivity {
+public class AutoCheckerMainActivity extends AppCompatActivity implements
+        ActivityCompat.OnRequestPermissionsResultCallback {
 
+    private static final String CURRENT_SELECTED_TAB = "CURRENT_SELECTED_TAB";
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -48,24 +57,40 @@ public class AutoCheckerMainActivity extends AppCompatActivity {
     private ViewPager mViewPager;
     private TabLayout mTabLayout;
 
-    private ScheduledExecutorService mSchduledReload;
-
     private WatchedLocation location;
 
     private List<Interval> intervalTabDates = new ArrayList<>();
     private int startDayHour;
     private boolean showWeekends;
 
+    private int mCurrentSelectedTab = -1;
+
+    private class AutoCheckerActivityBroadcastReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            if (intent.getAction().equals(AutoCheckerConstants.INTENT_ACTIVITY_RELOAD_REQUEST)) {
+                invalidateOptionsMenu();
+                mViewPager.getAdapter().notifyDataSetChanged();
+            }
+        }
+    }
+
+    private AutoCheckerActivityBroadcastReceiver mBroadcastReceiver;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_auto_checker_main);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
-        mSectionsPagerAdapter = new AutoCheckerLocationRecordPageAdapter(getSupportFragmentManager());
+        mSectionsPagerAdapter =
+                new AutoCheckerLocationRecordPageAdapter(getSupportFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
@@ -73,36 +98,55 @@ public class AutoCheckerMainActivity extends AppCompatActivity {
 
         mTabLayout = (TabLayout) findViewById(R.id.tabs);
         mTabLayout.setupWithViewPager(mViewPager);
+
+        checkPermissions();
+
+        mBroadcastReceiver = new AutoCheckerActivityBroadcastReceiver();
+        registerReceiver(mBroadcastReceiver,
+                new IntentFilter(AutoCheckerConstants.INTENT_ACTIVITY_RELOAD_REQUEST));
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if(savedInstanceState != null) {
+            if (savedInstanceState.containsKey(CURRENT_SELECTED_TAB))
+                mCurrentSelectedTab = savedInstanceState.getInt(CURRENT_SELECTED_TAB);
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (outState != null)
+            outState.putInt(CURRENT_SELECTED_TAB, mTabLayout.getSelectedTabPosition());
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
-/*
-        mSchduledReload = Executors.newSingleThreadScheduledExecutor();
-        mSchduledReload.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                mViewPager.getAdapter().notifyDataSetChanged();
-            }
-        }, 30, 30, TimeUnit.SECONDS);
-*/
-
         loadContents();
-
-        selectLastTab();
+        selectTab();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-//        mSchduledReload.shutdown();
     }
 
-    private void selectLastTab() {
-        if (mTabLayout.getTabCount() > 0)
-            mTabLayout.getTabAt(mTabLayout.getTabCount() - 1).select();
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(mBroadcastReceiver);
+    }
+
+    private void selectTab() {
+        if (mTabLayout.getTabCount() > 0) {
+            if (mCurrentSelectedTab >= 0 && mCurrentSelectedTab < mTabLayout.getTabCount())
+                mTabLayout.getTabAt(mCurrentSelectedTab).select();
+            else
+                mTabLayout.getTabAt(mTabLayout.getTabCount() - 1).select();
+        }
     }
 
     private void loadContents() {
@@ -123,7 +167,8 @@ public class AutoCheckerMainActivity extends AppCompatActivity {
         location = manager.getWatchedLocation(currentLocationName);
         startDayHour = prefs.getInt(AutoCheckerConstants.PREF_START_DAY_HOUR,
                 AutoCheckerConstants.DEFAULT_START_DAY_HOUR);
-        intervalTabDates = manager.getDateIntervals(location, DateUtils.INTERVAL_TYPE.WEEKS);
+        intervalTabDates =
+                manager.getDateIntervals(location, DateUtils.INTERVAL_TYPE.WEEKS, startDayHour);
         showWeekends = prefs.getBoolean(AutoCheckerConstants.PREF_SHOW_WEEKENDS, false);
 
         setTitle(currentLocationName);
@@ -131,13 +176,45 @@ public class AutoCheckerMainActivity extends AppCompatActivity {
         invalidateOptionsMenu();
 
         mViewPager.getAdapter().notifyDataSetChanged();
+    }
 
-        if (!prefs.getBoolean(AutoCheckerConstants.FIRST_RUN, false)) {
-            sendBroadcast(new Intent(AutoCheckerConstants.LOCATIONS_ACTIVITY_FIRST_RUN));
-            prefs.edit().putBoolean(AutoCheckerConstants.FIRST_RUN, true).apply();
+    private void checkFirstRun() {
+
+        SharedPreferences prefs = getPreferences(Context.MODE_PRIVATE);
+
+        long installTime =
+                DateUtils.getApplicationInstallTime(this, getApplication().getPackageName());
+
+        if (prefs.getLong(AutoCheckerConstants.INSTALL_TIME, 0) < installTime) {
+            prefs.edit().putLong(AutoCheckerConstants.INSTALL_TIME, installTime).apply();
+            requestRegisterGeofences();
         }
     }
 
+    private void checkPermissions() {
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) !=
+                PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions
+                    (this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
+        } else {
+            checkFirstRun();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(grantResults[0] == PackageManager.PERMISSION_GRANTED)
+            requestRegisterGeofences();
+    }
+
+    private void requestRegisterGeofences() {
+        sendBroadcast(new Intent(AutoCheckerConstants.INTENT_REQUEST_REGISTER_GEOFENCES));
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

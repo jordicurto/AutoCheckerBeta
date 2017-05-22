@@ -77,7 +77,7 @@ public class AutoCheckerTransitionManager extends ContextKeeper {
         }
 
         // Notify activities
-        Intent intentAct = new Intent(AutoCheckerConstants.TRANSITION_RECEIVED);
+        Intent intentAct = new Intent(AutoCheckerConstants.INTENT_ACTIVITY_RELOAD_REQUEST);
         intentAct.putExtra(AutoCheckerConstants.LOCATION_ID, location.getId());
         mContext.sendBroadcast(intentAct);
     }

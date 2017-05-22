@@ -1,5 +1,9 @@
 package com.github.jordicurto.autochecker.util;
 
+import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+
 import com.github.jordicurto.autochecker.data.model.WatchedLocationRecord;
 
 import org.joda.time.*;
@@ -9,6 +13,7 @@ import org.joda.time.format.DateTimeFormatterBuilder;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,20 +63,42 @@ public class DateUtils {
         }
     }
 
+    public enum PART_OF_DAY {
+        MORNING(0),
+        EVENING(1),
+        NIGHT(2);
+
+        private int index;
+
+        PART_OF_DAY(int index) {
+            this.index = index;
+        }
+
+        public int getIndex() {
+            return index;
+        }
+    }
+
     public static List<Interval> getDateIntervals(LocalDate start, LocalDate end,
                                                   INTERVAL_TYPE intervalType) {
 
         List<Interval> intervals = new ArrayList<>();
 
         LocalDate startDate = start;
-        LocalDate endDate = end.plusDays(1);
+        LocalDate endDate = end;
 
-        if (intervalType == INTERVAL_TYPE.WEEKS) {
-            startDate = startDate.withDayOfWeek(DateTimeConstants.MONDAY);
-            endDate = endDate.plusWeeks(1).withDayOfWeek(DateTimeConstants.MONDAY);
-        } else if (intervalType == INTERVAL_TYPE.MONTHS) {
-            startDate = startDate.withDayOfMonth(1);
-            endDate = endDate.plusMonths(1).withDayOfMonth(1);
+        switch (intervalType) {
+            case DAYS:
+                endDate = end.plusDays(1);
+                break;
+            case WEEKS:
+                startDate = startDate.withDayOfWeek(DateTimeConstants.MONDAY);
+                endDate = endDate.plusWeeks(1).withDayOfWeek(DateTimeConstants.MONDAY);
+                break;
+            case MONTHS:
+                startDate = startDate.withDayOfMonth(1);
+                endDate = endDate.plusMonths(1).withDayOfMonth(1);
+                break;
         }
 
         while (startDate.isBefore(endDate)) {
@@ -111,21 +138,27 @@ public class DateUtils {
                 DateTimeConstants.SUNDAY : DateTimeConstants.FRIDAY);
     }
 
-    public static Duration calculateDuration(WatchedLocationRecord record) {
+    public static Duration calculateDuration(WatchedLocationRecord record, Interval weekDay,
+                                             int startHourDay) {
         Duration checkDuration = Duration.ZERO;
+        LocalDateTime start = weekDay.getStart().plusHours(startHourDay).toLocalDateTime();
+        LocalDateTime end = weekDay.getEnd().plusHours(startHourDay).toLocalDateTime();
         if (record.getCheckIn() != null) {
             checkDuration = Duration.standardSeconds(
-                        Seconds.secondsBetween(record.getCheckIn(),
-                                record.isActive() ?
-                                        getCurrentDate() : record.getCheckOut()).getSeconds());
+                Seconds.secondsBetween(
+                        (start.isAfter(record.getCheckIn()) ? start : record.getCheckIn()),
+                        record.isActive() ? getCurrentDate() :
+                            (end.isBefore(record.getCheckOut()) ? end : record.getCheckOut()))
+                        .getSeconds());
         }
         return checkDuration;
     }
 
-    public static Duration calculateDuration(List<WatchedLocationRecord> records) {
+    public static Duration calculateDuration(List<WatchedLocationRecord> records,
+                                             Interval weekDay, int startHourDay) {
         Duration checksDuration = Duration.ZERO;
         for(WatchedLocationRecord record : records) {
-            checksDuration = checksDuration.plus(calculateDuration(record));
+            checksDuration = checksDuration.plus(calculateDuration(record, weekDay, startHourDay));
         }
         return checksDuration;
     }
@@ -140,5 +173,17 @@ public class DateUtils {
 
     public static long getCurrentDateMillis() {
         return getCurrentDate().toDateTime().getMillis();
+    }
+
+    public static long getApplicationInstallTime(Context context, String appName) {
+        long installTime = System.currentTimeMillis();
+        try {
+            PackageManager pm = context.getPackageManager();
+            ApplicationInfo appInfo = pm.getApplicationInfo(appName, 0);
+            String appFile = appInfo.sourceDir;
+            installTime = new File(appFile).lastModified();
+        } catch (PackageManager.NameNotFoundException e) {
+        }
+        return installTime;
     }
 }
