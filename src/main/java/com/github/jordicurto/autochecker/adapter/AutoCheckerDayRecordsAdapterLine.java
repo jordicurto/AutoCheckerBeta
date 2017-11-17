@@ -1,4 +1,4 @@
-package com.github.jordicurto.autochecker.adapter.erecyclerview;
+package com.github.jordicurto.autochecker.adapter;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -15,9 +15,9 @@ import java.util.List;
  * Created by jordi on 16/05/17.
  */
 
-public class AutoCheckerDayRecordsAdapter extends ExpandableRecyclerAdapter
+public class AutoCheckerDayRecordsAdapterLine extends ExpandableRecyclerAdapter
         <AutoCheckerDayRecords, AutoCheckerDayPartRecords,
-                AutoCheckerDayRecordsViewHolder, AutoCheckerDayPartRecordsViewHolder> {
+                AutoCheckerDayRecordsViewHolder, AutoCheckerDayPartRecordsViewHolderLine> {
 
     private LayoutInflater mInflater;
 
@@ -37,8 +37,8 @@ public class AutoCheckerDayRecordsAdapter extends ExpandableRecyclerAdapter
      * @param parentList List of all parents to be displayed in the RecyclerView that this
      *                   adapter is linked to
      */
-    public AutoCheckerDayRecordsAdapter(Context context,
-                                        @NonNull List<AutoCheckerDayRecords> parentList) {
+    public AutoCheckerDayRecordsAdapterLine(Context context,
+                                            @NonNull List<AutoCheckerDayRecords> parentList) {
         super(parentList);
         mInflater = LayoutInflater.from(context);
     }
@@ -53,11 +53,10 @@ public class AutoCheckerDayRecordsAdapter extends ExpandableRecyclerAdapter
 
     @NonNull
     @Override
-    public AutoCheckerDayPartRecordsViewHolder onCreateChildViewHolder(
+    public AutoCheckerDayPartRecordsViewHolderLine onCreateChildViewHolder(
             @NonNull ViewGroup childViewGroup, int viewType) {
-        View view = mInflater.inflate(R.layout.child_layout, childViewGroup, false);
-
-        return new AutoCheckerDayPartRecordsViewHolder(view);
+        View view = mInflater.inflate(R.layout.child_layout_line, childViewGroup, false);
+        return new AutoCheckerDayPartRecordsViewHolderLine(view);
     }
 
     @Override
@@ -67,7 +66,7 @@ public class AutoCheckerDayRecordsAdapter extends ExpandableRecyclerAdapter
     }
 
     @Override
-    public void onBindChildViewHolder(@NonNull AutoCheckerDayPartRecordsViewHolder childViewHolder,
+    public void onBindChildViewHolder(@NonNull AutoCheckerDayPartRecordsViewHolderLine childViewHolder,
                                       int parentPosition, int childPosition,
                                       @NonNull AutoCheckerDayPartRecords child) {
         childViewHolder.bind(child);

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Auto Checker</string>
     <string name="action_settings">Opcions</string>
     <string name="title_activity_auto_checker_records">AutoCheckerRecordsActivity</string>
     <string name="title_activity_test">TestActivity</string>
@@ -16,16 +15,18 @@
     <string name="record_duration">00:00</string>
     <string name="total_duration">Total</string>
 
+    <string name="inside_location_text">Estàs dins de %1$s</string>
+    <string name="outside_location_text">Estàs fora de %1$s</string>
 
-    <string name="notification_title_enter">Has entrat a</string>
-    <string name="notification_title_leave">Has sortit de</string>
+    <string name="notification_title_enter">Has entrat a %1$s</string>
+    <string name="notification_title_leave">Has sortit de %1$s</string>
 
-    <string name="notification_text">S\'ha registrat l\'event a les</string>
+    <string name="notification_text">S\'ha registrat l\'event a les %1$s</string>
 
     <string name="inside_outside_menu">Esteu dins?</string>
-    <string name="request_permission_title" />
-    <string name="request_permission_text" />
-    <string name="notification_register_geofence_title" />
-    <string name="notification_register_geofence_text" />
+    <string name="request_permission_title">Sol\·licitud de permisos</string>
+    <string name="request_permission_text">L\'aplicació necessita permisios per funcionar</string>
+    <string name="notification_register_geofence_title">%1$s s\'està executant</string>
+    <string name="notification_register_geofence_text">L\'aplicació ara està seguint la teva ubicació</string>
 
 </resources>

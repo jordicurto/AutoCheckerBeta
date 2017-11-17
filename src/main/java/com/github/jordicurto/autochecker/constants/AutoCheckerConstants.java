@@ -12,11 +12,13 @@ public class AutoCheckerConstants {
 	public static final String PREF_START_DAY_HOUR = "PREF_START_DAY_HOUR";
 	public static final String PREF_SHOW_WEEKENDS = "PREF_SHOW_WEEKENDS";
 
-	public static final WatchedLocation WL_GTD = new WatchedLocation("GTD", 2.209514, 41.400665, 100);
+	public static final WatchedLocation WL_GTD = new WatchedLocation("GTD", 41.400649, 2.209370, 105);
 
     public static final long INVALID_DELAY = -1L;
     public static final long DELAY_FOR_SUSPECT_TRANSITION = 3 * DateUtils.MINS_PER_MILLISECOND;
     public static final long DELAY_FOR_STANDARD_TRANSITION = 1 * DateTimeConstants.MILLIS_PER_SECOND;
+
+    public static final int LOITERING_DELAY = 5 * DateTimeConstants.MILLIS_PER_SECOND;
 
     public static final String GEOFENCE_TRANSITION_RECEIVED = "GEOFENCE_TRANSITION_RECEIVED";
 	public static final String GEOFENCE_TRANSITION_CONFIRM_RECEIVED = "GEOFENCE_TRANSITION_CONFIRM_RECEIVED";

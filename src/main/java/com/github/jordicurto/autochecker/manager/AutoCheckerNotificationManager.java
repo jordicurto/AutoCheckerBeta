@@ -48,11 +48,10 @@ public class AutoCheckerNotificationManager extends ContextKeeper {
                     location.getStatus() == WatchedLocation.INSIDE_LOCATION ?
                     R.drawable.ic_enter_notification : R.drawable.ic_exit_notification,
                     (location.getStatus() == WatchedLocation.INSIDE_LOCATION ?
-                            mContext.getString(R.string.notification_title_enter) :
-                            mContext.getString(R.string.notification_title_leave))
-                            + " " + location.getName(),
-                    mContext.getString(R.string.notification_text) + " " +
-                            DateUtils.timeFormat.print(new LocalDateTime(time)));
+                        mContext.getString(R.string.notification_title_enter, location.getName()) :
+                        mContext.getString(R.string.notification_title_leave, location.getName())),
+                    mContext.getString(R.string.notification_text,
+                        DateUtils.timeFormat.print(new LocalDateTime(time))));
 
             nManager.notify((location.getStatus() == WatchedLocation.INSIDE_LOCATION ?
                     AutoCheckerConstants.NOTIFICATION_TRANSITION_ENTER_ID :
@@ -69,7 +68,8 @@ public class AutoCheckerNotificationManager extends ContextKeeper {
 
             Notification notification = buildNotification(
                     R.drawable.ic_notification_register_geofence,
-                    mContext.getString(R.string.notification_register_geofence_title),
+                    mContext.getString(R.string.notification_register_geofence_title,
+                            mContext.getString(R.string.app_name)),
                     mContext.getString(R.string.notification_register_geofence_text));
 
             nManager.notify(AutoCheckerConstants.NOTIFICATION_REGISTER_GEOFENCE_ID, notification);

@@ -1,7 +1,6 @@
 package com.github.jordicurto.autochecker.fragment;
 
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -11,11 +10,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.bignerdranch.expandablerecyclerview.ExpandableRecyclerAdapter;
 import com.github.jordicurto.autochecker.R;
-import com.github.jordicurto.autochecker.adapter.AutoCheckerWeekRecordsAdapter;
-import com.github.jordicurto.autochecker.adapter.erecyclerview.AutoCheckerDayRecords;
-import com.github.jordicurto.autochecker.adapter.erecyclerview.AutoCheckerDayRecordsAdapter;
+import com.github.jordicurto.autochecker.adapter.AutoCheckerDayRecords;
+import com.github.jordicurto.autochecker.adapter.AutoCheckerDayRecordsAdapterLine;
 import com.github.jordicurto.autochecker.data.model.WatchedLocation;
 import com.github.jordicurto.autochecker.data.model.WatchedLocationRecord;
 import com.github.jordicurto.autochecker.manager.AutoCheckerBusinessManager;
@@ -117,8 +114,6 @@ public class AutoCheckerWeekRecordsFragment extends Fragment {
 
                 AutoCheckerDayRecords row =
                         new AutoCheckerDayRecords(weekDays.get(i), startHourDay, records);
-                /*AutoCheckerWeekDayRecords row =
-                        new AutoCheckerWeekDayRecords(weekDays.get(i), startHourDay, records); */
                 totalDuration = totalDuration.plus(row.getDuration());
                 rows.add(row);
             }
@@ -126,8 +121,8 @@ public class AutoCheckerWeekRecordsFragment extends Fragment {
         
         totalDurationText.setText(DateUtils.getDurationString(totalDuration));
 
-        //recyclerView.setAdapter(new AutoCheckerWeekRecordsAdapter(rows, startHourDay));
-        recyclerView.setAdapter(new AutoCheckerDayRecordsAdapter(getContext(), rows));
+        //recyclerView.setAdapter(new AutoCheckerDayRecordsAdapter(getContext(), rows));
+        recyclerView.setAdapter(new AutoCheckerDayRecordsAdapterLine(getContext(), rows));
     }
 
 }

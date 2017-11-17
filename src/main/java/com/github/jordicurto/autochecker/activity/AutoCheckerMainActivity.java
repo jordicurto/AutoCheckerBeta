@@ -9,10 +9,16 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
@@ -24,6 +30,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.github.jordicurto.autochecker.R;
 import com.github.jordicurto.autochecker.constants.AutoCheckerConstants;
@@ -83,7 +92,7 @@ public class AutoCheckerMainActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_auto_checker_main);
+        setContentView(R.layout.autochecker_main);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -98,6 +107,13 @@ public class AutoCheckerMainActivity extends AppCompatActivity implements
 
         mTabLayout = (TabLayout) findViewById(R.id.tabs);
         mTabLayout.setupWithViewPager(mViewPager);
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open,
+                R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
 
         checkPermissions();
 
@@ -140,6 +156,17 @@ public class AutoCheckerMainActivity extends AppCompatActivity implements
         unregisterReceiver(mBroadcastReceiver);
     }
 
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+
     private void selectTab() {
         if (mTabLayout.getTabCount() > 0) {
             if (mCurrentSelectedTab >= 0 && mCurrentSelectedTab < mTabLayout.getTabCount())
@@ -170,8 +197,6 @@ public class AutoCheckerMainActivity extends AppCompatActivity implements
         intervalTabDates =
                 manager.getDateIntervals(location, DateUtils.INTERVAL_TYPE.WEEKS, startDayHour);
         showWeekends = prefs.getBoolean(AutoCheckerConstants.PREF_SHOW_WEEKENDS, false);
-
-        setTitle(currentLocationName);
 
         invalidateOptionsMenu();
 
@@ -250,6 +275,13 @@ public class AutoCheckerMainActivity extends AppCompatActivity implements
             return true;
         }
 
+        if (id == R.id.inside_location_action) {
+            Toast.makeText(this, getString(location.isInside() ?
+                    R.string.inside_location_text : R.string.outside_location_text,
+                    location.getName()), Toast.LENGTH_SHORT).show();
+            return true;
+        }
+
         return super.onOptionsItemSelected(item);
     }
 
@@ -283,5 +315,6 @@ public class AutoCheckerMainActivity extends AppCompatActivity implements
         public CharSequence getPageTitle(int position) {
             return DateUtils.getDateIntervalString(intervalTabDates.get(position));
         }
+
     }
 }

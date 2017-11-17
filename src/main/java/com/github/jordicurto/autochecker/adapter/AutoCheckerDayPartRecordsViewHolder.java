@@ -1,4 +1,4 @@
-package com.github.jordicurto.autochecker.adapter.erecyclerview;
+package com.github.jordicurto.autochecker.adapter;
 
 import android.support.annotation.NonNull;
 import android.view.View;
@@ -9,12 +9,12 @@ import com.github.jordicurto.autochecker.constants.AutoCheckerConstants;
 import com.github.jordicurto.autochecker.data.model.WatchedLocationRecord;
 import com.github.jordicurto.autochecker.util.DateUtils;
 import com.github.mikephil.charting.charts.HorizontalBarChart;
-import com.github.mikephil.charting.components.LimitLine;
-import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.components.AxisBase;
+import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
-import com.github.mikephil.charting.formatter.YAxisValueFormatter;
+import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 
 import org.joda.time.Duration;
 import org.joda.time.LocalDateTime;
@@ -56,6 +56,8 @@ public class AutoCheckerDayPartRecordsViewHolder extends ChildViewHolder {
 
     private void configureChart() {
 
+        Description desc = new Description();
+        desc.setText("");
         chart.setPinchZoom(false);
         chart.setDoubleTapToZoomEnabled(false);
         chart.getAxisLeft().setEnabled(true);
@@ -73,7 +75,7 @@ public class AutoCheckerDayPartRecordsViewHolder extends ChildViewHolder {
         chart.setDrawGridBackground(false);
         chart.setDragEnabled(false);
         chart.setScaleEnabled(false);
-        chart.setDescription("");
+        chart.setDescription(desc);
     }
 
     private LocalDateTime toLocalTime(float value, DateUtils.PART_OF_DAY dayPart) {
@@ -93,9 +95,9 @@ public class AutoCheckerDayPartRecordsViewHolder extends ChildViewHolder {
 
         setRecords(dayPartRecords.getRecords(), dayPartRecords.getDayPart());
 
-        chart.getAxisLeft().setValueFormatter(new YAxisValueFormatter() {
+        chart.getAxisLeft().setValueFormatter(new IAxisValueFormatter() {
             @Override
-            public String getFormattedValue(float value, YAxis yAxis) {
+            public String getFormattedValue(float value, AxisBase axis) {
                 return DateUtils.hourFormat.print(toLocalTime(value, dayPartRecords.getDayPart()));
             }
         });
@@ -159,11 +161,11 @@ public class AutoCheckerDayPartRecordsViewHolder extends ChildViewHolder {
         }
 
         List<BarEntry> yValues = new ArrayList<>();
-        yValues.add(new BarEntry(stepArray, 0, dayPart.name()));
+        yValues.add(new BarEntry(0, stepArray, dayPart.name()));
         BarDataSet dataSet = new BarDataSet(yValues, dayPart.name());
         dataSet.setColors(colors);
         dataSet.setDrawValues(false);
-        BarData data = new BarData(new String[]{dayPart.name()}, dataSet);
+        BarData data = new BarData(dataSet);
         data.setDrawValues(false);
         data.setHighlightEnabled(false);
 

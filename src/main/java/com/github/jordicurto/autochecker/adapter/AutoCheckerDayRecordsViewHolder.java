@@ -1,4 +1,4 @@
-package com.github.jordicurto.autochecker.adapter.erecyclerview;
+package com.github.jordicurto.autochecker.adapter;
 
 import android.support.annotation.NonNull;
 import android.view.View;

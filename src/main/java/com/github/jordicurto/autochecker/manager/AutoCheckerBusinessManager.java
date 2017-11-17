@@ -68,7 +68,7 @@ public class AutoCheckerBusinessManager {
             dataSource.close();
 
         } catch (NoLocationFoundException e) {
-            Log.e(TAG, "Location not found execption", e);
+            Log.e(TAG, "Location not found exception", e);
         } catch (SQLException e) {
             Log.e(TAG, "DataSource exception", e);
         } finally {
@@ -89,7 +89,7 @@ public class AutoCheckerBusinessManager {
             dataSource.close();
 
         } catch (NoLocationFoundException e) {
-            Log.e(TAG, "Location not found execption", e);
+            Log.e(TAG, "Location not found exception", e);
         } catch (SQLException e) {
             Log.e(TAG, "DataSource exception", e);
         } finally {
@@ -130,7 +130,8 @@ public class AutoCheckerBusinessManager {
 
                 case WatchedLocation.INSIDE_LOCATION:
 
-                    Log.w(TAG, "User has entered to " + location.getName() + " but he/she was there yet");
+                    Log.w(TAG, "User has entered to " + location.getName() +
+                            " but he/she was there yet");
                     break;
             }
 
@@ -171,7 +172,8 @@ public class AutoCheckerBusinessManager {
 
                 case WatchedLocation.OUTSIDE_LOCATION:
 
-                    Log.w(TAG, "User has leaving " + location.getName() + " but he/she wasn't there yet");
+                    Log.w(TAG, "User has leaving " + location.getName() +
+                            " but he/she wasn't there yet");
                     break;
             }
 
@@ -188,9 +190,9 @@ public class AutoCheckerBusinessManager {
         return record;
     }
 
-    public List<Interval> getDateIntervals(WatchedLocation location,
-                                           DateUtils.INTERVAL_TYPE intervalType,
-                                           int startDayHour) {
+    public List<Interval> getDateIntervals(
+            WatchedLocation location, DateUtils.INTERVAL_TYPE intervalType,
+            int startDayHour) {
 
         List<Interval> intervals = new ArrayList<>();
 
@@ -200,7 +202,10 @@ public class AutoCheckerBusinessManager {
 
             intervals = DateUtils.getDateIntervals(
                     dataSource.getLimitDates(location).getStart().toLocalDate(),
-                    DateUtils.getCurrentDate().minusHours(startDayHour).toLocalDate(), intervalType);
+                    DateUtils.getCurrentDate().minusHours(startDayHour).toLocalDate(),
+                    intervalType);
+
+            dataSource.close();
 
         } catch (SQLException e) {
             Log.e(TAG, "DataSource exception", e);
@@ -227,8 +232,8 @@ public class AutoCheckerBusinessManager {
 
     }
 
-    public List<WatchedLocationRecord> getIntervalWatchedLocationRecord(WatchedLocation location,
-                                                                        Interval interval, int startHourDay) {
+    public List<WatchedLocationRecord> getIntervalWatchedLocationRecord(
+            WatchedLocation location, Interval interval, int startHourDay) {
 
         List<WatchedLocationRecord> records = new ArrayList<WatchedLocationRecord>();
 

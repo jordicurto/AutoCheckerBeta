@@ -2,11 +2,13 @@
       xmlns:app="http://schemas.android.com/apk/res-auto"
       xmlns:tools="http://schemas.android.com/tools"
       tools:context="com.github.jordicurto.autochecker.activity.AutoCheckerMainActivity">
-    <item app:showAsAction="always"
+    <item
         android:id="@+id/inside_location_action"
+        android:title=""
+        app:showAsAction="always"
         android:icon="@drawable/ic_outside_indicator_action"
-        android:enabled="false"
-        android:checkable="false" />
+        android:enabled="true"
+        android:checkable="true" />
     <item
         android:id="@+id/action_settings"
         android:orderInCategory="102"

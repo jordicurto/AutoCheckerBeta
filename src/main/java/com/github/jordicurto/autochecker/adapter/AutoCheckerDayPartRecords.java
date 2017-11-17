@@ -1,4 +1,4 @@
-package com.github.jordicurto.autochecker.adapter.erecyclerview;
+package com.github.jordicurto.autochecker.adapter;
 
 import com.github.jordicurto.autochecker.data.model.WatchedLocationRecord;
 import com.github.jordicurto.autochecker.util.DateUtils;

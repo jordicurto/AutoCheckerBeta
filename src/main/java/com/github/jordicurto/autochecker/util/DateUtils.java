@@ -65,7 +65,7 @@ public class DateUtils {
 
     public enum PART_OF_DAY {
         MORNING(0),
-        EVENING(1),
+        AFTERNOON(1),
         NIGHT(2);
 
         private int index;
@@ -106,13 +106,16 @@ public class DateUtils {
             Interval interval;
 
             if (intervalType == INTERVAL_TYPE.WEEKS) {
-                interval = startDate.toInterval().withPeriodAfterStart(Period.weeks(1).minusMinutes(1));
+                interval = startDate.toInterval().withPeriodAfterStart(
+                        Period.weeks(1).minusMinutes(1));
                 startDate = startDate.plusWeeks(1);
             } else if (intervalType == INTERVAL_TYPE.MONTHS) {
-                interval = startDate.toInterval().withPeriodAfterStart(Period.months(1).minusMinutes(1));
+                interval = startDate.toInterval().withPeriodAfterStart(
+                        Period.months(1).minusMinutes(1));
                 startDate = startDate.plusMonths(1);
             } else {
-                interval = startDate.toInterval().withPeriodAfterStart(Period.days(1).minusMinutes(1));
+                interval = startDate.toInterval().withPeriodAfterStart(
+                        Period.days(1).minusMinutes(1));
                 startDate = startDate.plusDays(1);
             }
 

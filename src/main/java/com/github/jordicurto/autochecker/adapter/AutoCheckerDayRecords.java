@@ -1,4 +1,4 @@
-package com.github.jordicurto.autochecker.adapter.erecyclerview;
+package com.github.jordicurto.autochecker.adapter;
 
 import com.bignerdranch.expandablerecyclerview.model.Parent;
 import com.github.jordicurto.autochecker.constants.AutoCheckerConstants;

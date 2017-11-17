@@ -26,12 +26,14 @@ public class DividerItemDecoration extends RecyclerView.ItemDecoration {
     }
 
     private void drawDivider(Canvas c, View child, int left, int right) {
-        final RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) child
-                .getLayoutParams();
-        final int top = child.getBottom() + params.bottomMargin;
-        final int bottom = top + mDivider.getIntrinsicHeight();
-        mDivider.setBounds(left, top, right, bottom);
-        mDivider.draw(c);
+        if (child != null) {
+            final RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) child
+                    .getLayoutParams();
+            final int top = child.getBottom() + params.bottomMargin;
+            final int bottom = top + mDivider.getIntrinsicHeight();
+            mDivider.setBounds(left, top, right, bottom);
+            mDivider.draw(c);
+        }
     }
 
     @Override
