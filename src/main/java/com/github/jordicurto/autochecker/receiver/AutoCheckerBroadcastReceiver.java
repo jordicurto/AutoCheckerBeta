@@ -126,8 +126,8 @@ public class AutoCheckerBroadcastReceiver extends BroadcastReceiver {
                                     event.getGeofenceTransition());
 
                             switch (event.getGeofenceTransition()) {
-                                //case Geofence.GEOFENCE_TRANSITION_ENTER:
-                                case Geofence.GEOFENCE_TRANSITION_DWELL:
+                                case Geofence.GEOFENCE_TRANSITION_ENTER:
+                                //case Geofence.GEOFENCE_TRANSITION_DWELL:
                                     if (location.getStatus() == WatchedLocation.OUTSIDE_LOCATION) {
                                         transitionManager.scheduleRegisterTransition(location, time,
                                                 AutoCheckerTransitionManager.ENTER_TRANSITION, delay);
@@ -182,7 +182,8 @@ public class AutoCheckerBroadcastReceiver extends BroadcastReceiver {
         boolean locInsideTriggerLoc = (distance + wLocation.getRadius()) < triggerLocation.getAccuracy();
 
         switch (transition) {
-            case Geofence.GEOFENCE_TRANSITION_DWELL:
+            case Geofence.GEOFENCE_TRANSITION_ENTER:
+            //case Geofence.GEOFENCE_TRANSITION_DWELL:
 
                 return AutoCheckerConstants.DELAY_FOR_STANDARD_TRANSITION;
 

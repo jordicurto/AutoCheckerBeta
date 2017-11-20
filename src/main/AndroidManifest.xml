@@ -39,9 +39,18 @@
                 <action android:name="GEOFENCE_TRANSITION_CONFIRM_RECEIVED" />
                 <action android:name="LOCATIONS_ACTIVITY_FIRST_RUN" />
                 <action android:name="INTENT_PERMISSION_GRANTED" />
+                <action android:name="INTENT_REQUEST_REGISTER_GEOFENCES" />
             </intent-filter>
         </receiver>
 
+        <activity
+            android:name=".activity.AutoCheckerSettingsActivity"
+            android:label="@string/title_activity_auto_checker_settings"
+            android:parentActivityName=".activity.AutoCheckerMainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.github.jordicurto.autochecker.activity.AutoCheckerMainActivity" />
+        </activity>
     </application>
 
 </manifest>

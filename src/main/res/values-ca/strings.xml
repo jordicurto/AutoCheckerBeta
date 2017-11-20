@@ -11,7 +11,6 @@
     <string name="inside_location">Dins</string>
     <string name="outside_location">Fora</string>
     <string name="empty_locations_list">No s\'ha trobat cap localització</string>
-    <string name="first_last_day_record">00:00 - 00:00</string>
     <string name="record_duration">00:00</string>
     <string name="total_duration">Total</string>
 
@@ -28,5 +27,9 @@
     <string name="request_permission_text">L\'aplicació necessita permisios per funcionar</string>
     <string name="notification_register_geofence_title">%1$s s\'està executant</string>
     <string name="notification_register_geofence_text">L\'aplicació ara està seguint la teva ubicació</string>
+    <string name="location_list_title">Localitzacions</string>
+    <string name="show_weekends_pref_summary">Indica si han de ser visibles els dies del cap de setmana</string>
+    <string name="show_weekends_pref_title">Mostrar caps de setmana</string>
+    <string name="pref_header_general">General</string>
 
 </resources>

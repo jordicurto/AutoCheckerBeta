@@ -24,7 +24,7 @@
     <string name="title_activity_auto_checker_main">AutoCheckerMainActivity</string>
     <string name="inside_outside_menu">Are you inside?</string>
     <string name="request_permission_title">Permissions request</string>
-    <string name="request_permission_text">Application needs permissions to run.</string>
+    <string name="request_permission_text">Application needs permissions to run</string>
     <string name="notification_register_geofence_title">%1$s is running</string>
     <string name="notification_register_geofence_text">Application is now tracking your location</string>
     <string name="title_activity_auto_checker_settings">Settings</string>
@@ -33,5 +33,10 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="title_activity_auto_checker_new_main">AutoCheckerNewMainActivity</string>
+    <string name="location_list_title">Locations</string>
+
+    <string name="show_weekends_pref_summary">Whether show weekend days in record list</string>
+    <string name="show_weekends_pref_title">Show weekends</string>
+    <string name="pref_header_general">General</string>
 
 </resources>

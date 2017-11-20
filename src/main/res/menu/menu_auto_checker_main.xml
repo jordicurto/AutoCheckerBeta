@@ -9,9 +9,9 @@
         android:icon="@drawable/ic_outside_indicator_action"
         android:enabled="true"
         android:checkable="true" />
-    <item
+<!--    <item
         android:id="@+id/action_settings"
         android:orderInCategory="102"
         android:title="@string/action_settings"
-        app:showAsAction="never" />
+        app:showAsAction="never" /> -->
 </menu>

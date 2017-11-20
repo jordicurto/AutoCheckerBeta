@@ -45,10 +45,10 @@ public class AutoCheckerGeofencingRegisterer extends ContextKeeper
         return new Geofence.Builder()
                 .setCircularRegion(location.getLatitude(), location.getLongitude(), location.getRadius())
                 .setExpirationDuration(Geofence.NEVER_EXPIRE)
-                .setTransitionTypes(//Geofence.GEOFENCE_TRANSITION_ENTER
-                        Geofence.GEOFENCE_TRANSITION_DWELL
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER
+                        //Geofence.GEOFENCE_TRANSITION_DWELL
                         | Geofence.GEOFENCE_TRANSITION_EXIT)
-                .setLoiteringDelay(AutoCheckerConstants.LOITERING_DELAY)
+                //.setLoiteringDelay(AutoCheckerConstants.LOITERING_DELAY)
                 .setRequestId(AUTOCHECKER_GEOFENCE_REQ_ID + location.getId()).build();
     }
 

@@ -10,6 +10,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
@@ -47,7 +48,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AutoCheckerMainActivity extends AppCompatActivity implements
-        ActivityCompat.OnRequestPermissionsResultCallback {
+        ActivityCompat.OnRequestPermissionsResultCallback,
+        NavigationView.OnNavigationItemSelectedListener {
 
     private static final String CURRENT_SELECTED_TAB = "CURRENT_SELECTED_TAB";
     /**
@@ -115,6 +117,9 @@ public class AutoCheckerMainActivity extends AppCompatActivity implements
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
         checkPermissions();
 
         mBroadcastReceiver = new AutoCheckerActivityBroadcastReceiver();
@@ -154,6 +159,11 @@ public class AutoCheckerMainActivity extends AppCompatActivity implements
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(mBroadcastReceiver);
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        return false;
     }
 
     @Override
@@ -271,9 +281,13 @@ public class AutoCheckerMainActivity extends AppCompatActivity implements
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
+        /*
         if (id == R.id.action_settings) {
+            Intent launchNewIntent = new Intent(AutoCheckerMainActivity.this,
+                    AutoCheckerSettingsActivity.class);
+            startActivityForResult(launchNewIntent, 0);
             return true;
-        }
+        } */
 
         if (id == R.id.inside_location_action) {
             Toast.makeText(this, getString(location.isInside() ?

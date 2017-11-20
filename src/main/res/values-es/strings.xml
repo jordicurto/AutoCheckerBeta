@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_settings">Opciones</string>
+    <string name="empty_locations_list">No se ha encontrado ninguna localización</string>
+    <string name="first_last_day_record"></string>
+    <string name="inside_location">Dentro</string>
+    <string name="inside_location_text">Estás dentro de %1$s</string>
+    <string name="inside_outside_menu">Estás dentro?</string>
+    <string name="location_list_title">Localizaciones</string>
+    <string name="location_name">Nombre</string>
+    <string name="notification_register_geofence_text">La applicación ahora esta siguiendo tu ubicación</string>
+    <string name="notification_register_geofence_title">%1$s se esta ejecutando</string>
+    <string name="notification_text">Se ha registrado el evento a las %1$s</string>
+    <string name="notification_title_enter">Has entrado a %1$s</string>
+    <string name="notification_title_leave">Ha salido de %1$s</string>
+    <string name="outside_location">Fuera</string>
+    <string name="outside_location_text">Estás fuera de %1$s</string>
+    <string name="pref_header_general">General</string>
+    <string name="record_duration">00:00</string>
+    <string name="request_permission_text">La aplicación necesita pemisos para ejecutarse</string>
+    <string name="request_permission_title">Solicitud de permisos</string>
+    <string name="show_weekends_pref_summary">Indica si se han de mostrar los dias del fin de semana</string>
+    <string name="show_weekends_pref_title">Mostrar los fines de semana</string>
+    <string name="total_duration">Total</string>
+    <string name="week_day">Día de la semana</string>
+</resources>
