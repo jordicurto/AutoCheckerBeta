@@ -6,20 +6,22 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationManager;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import com.github.jordicurto.autochecker.R;
 import com.github.jordicurto.autochecker.data.model.WatchedLocation;
-import com.github.jordicurto.autochecker.geofence.AutoCheckerGeofencingRegisterer;
+import com.github.jordicurto.autochecker.geofence.AutoCheckerGeofencingClient;
+import com.github.jordicurto.autochecker.location.AutoCheckerLocationSettingsClient;
 import com.github.jordicurto.autochecker.manager.AutoCheckerBusinessManager;
 import com.github.jordicurto.autochecker.manager.AutoCheckerNotificationManager;
 import com.github.jordicurto.autochecker.manager.AutoCheckerTransitionManager;
 import com.github.jordicurto.autochecker.constants.AutoCheckerConstants;
 import com.github.jordicurto.autochecker.util.DateUtils;
 import com.github.jordicurto.autochecker.util.LocationUtils;
-import com.github.jordicurto.autochecker.util.PermissionHelper;
 import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofenceStatusCodes;
 import com.google.android.gms.location.GeofencingEvent;
 
 import java.util.List;
@@ -27,10 +29,6 @@ import java.util.List;
 public class AutoCheckerBroadcastReceiver extends BroadcastReceiver {
 
     private final String TAG = getClass().getSimpleName();
-
-    private AutoCheckerGeofencingRegisterer geofencingRegisterer = null;
-    private AutoCheckerTransitionManager transitionManager = null;
-    private AutoCheckerNotificationManager notificationManager = null;
 
     public AutoCheckerBroadcastReceiver() {
     }
@@ -42,20 +40,24 @@ public class AutoCheckerBroadcastReceiver extends BroadcastReceiver {
 
         Log.d(TAG, "Intent received " + action);
 
-        if (geofencingRegisterer == null)
-            geofencingRegisterer = new AutoCheckerGeofencingRegisterer(context);
+        if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
 
-        if (transitionManager == null)
-            transitionManager = new AutoCheckerTransitionManager(context);
+            checkPermission(context);
 
-        if (notificationManager == null)
-            notificationManager = new AutoCheckerNotificationManager(context);
+        } else if (action.equals(AutoCheckerConstants.INTENT_PERMISSION_GRANTED) ||
+                action.equals(AutoCheckerConstants.INTENT_REQUEST_CHECK_LOCATION) ||
+                action.equals(LocationManager.PROVIDERS_CHANGED_ACTION)) {
 
-        if (action.equals(Intent.ACTION_BOOT_COMPLETED) ||
-                action.equals(AutoCheckerConstants.INTENT_REQUEST_REGISTER_GEOFENCES) ||
-                action.equals(AutoCheckerConstants.INTENT_PERMISSION_GRANTED)) {
+            AutoCheckerLocationSettingsClient.getInstance(context).checkLocationSettings();
+
+        } else if (action.equals(AutoCheckerConstants.INTENT_REQUEST_REGISTER_GEOFENCES)) {
 
             registerGeofences(context);
+
+        } else if (action.equals(Intent.ACTION_SHUTDOWN) ||
+                action.equals("android.intent.action.QUICKBOOT_POWEROFF")) {
+
+            leaveAndUnregisterGeofences(context);
 
         } else if (action.equals(AutoCheckerConstants.GEOFENCE_TRANSITION_RECEIVED)) {
 
@@ -71,32 +73,40 @@ public class AutoCheckerBroadcastReceiver extends BroadcastReceiver {
         }
     }
 
-    private void registerGeofences(Context context) {
+    private void checkPermission(Context context) {
 
         if (ContextCompat.checkSelfPermission
                 (context, Manifest.permission.ACCESS_FINE_LOCATION) !=
                 PackageManager.PERMISSION_GRANTED) {
 
-            PermissionHelper.requestPermissions(context,
-                    new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, 0,
-                    context.getString(R.string.request_permission_title),
-                    context.getString(R.string.request_permission_text),
-                    R.drawable.ic_request_permssion);
+            AutoCheckerNotificationManager.getInstance(context).notifyPermissionRequired(
+                    new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, 0);
 
         } else {
-
-            Log.d(TAG, "Creating and registering geofences ");
-
-            List<WatchedLocation> list = AutoCheckerBusinessManager.getManager(context).getAllWatchedLocations();
-
-            geofencingRegisterer.registerGeofences(list);
-
+            AutoCheckerLocationSettingsClient.getInstance(context).checkLocationSettings();
         }
+    }
+
+    private void registerGeofences(Context context) {
+
+        Log.d(TAG, "Creating and registering geofences ");
+
+        List<WatchedLocation> list = AutoCheckerBusinessManager.getManager(context).getAllWatchedLocations();
+
+        AutoCheckerGeofencingClient.getInstance(context).registerGeofences(list);
+    }
+
+    private void leaveAndUnregisterGeofences(Context context) {
+        AutoCheckerBusinessManager.getManager(context).
+                forceLeaveCurrentLocations(DateUtils.getCurrentDate());
+        AutoCheckerGeofencingClient.getInstance(context).unregisterGeofences();
     }
 
     private void handleTransition(Context context, Intent intent) {
 
         Log.d(TAG, "Proximity alert received by geofencing ");
+
+        long time = DateUtils.getCurrentDateMillis();
 
         GeofencingEvent event = GeofencingEvent.fromIntent(intent);
 
@@ -104,21 +114,27 @@ public class AutoCheckerBroadcastReceiver extends BroadcastReceiver {
 
             if (event.hasError()) {
 
-                Log.e(TAG, "GeoFence Error: " + AutoCheckerGeofencingRegisterer.getErrorString(event.getErrorCode()));
+                Log.e(TAG, "GeoFence Error: " +
+                        AutoCheckerGeofencingClient.getErrorString(event.getErrorCode()));
+
+                if (event.getErrorCode() == GeofenceStatusCodes.GEOFENCE_NOT_AVAILABLE) {
+                    // Location disabled
+                    AutoCheckerNotificationManager.getInstance(context).
+                            notifyEnableLocationRequired();
+                    leaveAndUnregisterGeofences(context);
+                }
 
             } else {
-
-                long time = DateUtils.getCurrentDateMillis();
 
                 Location triggerLocation = event.getTriggeringLocation();
 
                 for (Geofence fence : event.getTriggeringGeofences()) {
 
-                    try {
+                    String locationName = AutoCheckerGeofencingClient.getLocationName(fence);
 
-                        int locationId = geofencingRegisterer.getLocationId(fence);
-
-                        WatchedLocation location = AutoCheckerBusinessManager.getManager(context).getWatchedLocation(locationId);
+                    if (locationName != null) {
+                        WatchedLocation location = AutoCheckerBusinessManager.getManager(context).
+                                getWatchedLocation(locationName);
 
                         if (location != null && triggerLocation != null) {
 
@@ -127,29 +143,30 @@ public class AutoCheckerBroadcastReceiver extends BroadcastReceiver {
 
                             switch (event.getGeofenceTransition()) {
                                 case Geofence.GEOFENCE_TRANSITION_ENTER:
-                                //case Geofence.GEOFENCE_TRANSITION_DWELL:
+                                    //case Geofence.GEOFENCE_TRANSITION_DWELL:
                                     if (location.getStatus() == WatchedLocation.OUTSIDE_LOCATION) {
-                                        transitionManager.scheduleRegisterTransition(location, time,
+                                        AutoCheckerTransitionManager.getInstance(context).
+                                                scheduleRegisterTransition(location, time,
                                                 AutoCheckerTransitionManager.ENTER_TRANSITION, delay);
                                     } else {
-                                        transitionManager.cancelScheduledRegisterTransition();
+                                        AutoCheckerTransitionManager.getInstance(context).
+                                                cancelScheduledRegisterTransition();
                                     }
                                     break;
                                 case Geofence.GEOFENCE_TRANSITION_EXIT:
                                     if (location.getStatus() == WatchedLocation.INSIDE_LOCATION) {
-                                        transitionManager.scheduleRegisterTransition(location, time,
+                                        AutoCheckerTransitionManager.getInstance(context).
+                                                scheduleRegisterTransition(location, time,
                                                 AutoCheckerTransitionManager.LEAVE_TRANSITION, delay);
                                     } else {
-                                        transitionManager.cancelScheduledRegisterTransition();
+                                        AutoCheckerTransitionManager.getInstance(context).
+                                                cancelScheduledRegisterTransition();
                                     }
                                     break;
                                 default:
                                     break;
                             }
                         }
-
-                    } catch (NumberFormatException e) {
-                        Log.e(TAG, "Can't get location id from : " + fence.getRequestId());
                     }
                 }
             }
@@ -165,9 +182,10 @@ public class AutoCheckerBroadcastReceiver extends BroadcastReceiver {
         long time = intent.getLongExtra(AutoCheckerConstants.TRANSITION_TIME, 0);
         int direction = intent.getIntExtra(AutoCheckerConstants.TRANSITION_DIRECTION, AutoCheckerTransitionManager.LEAVE_TRANSITION);
 
-        transitionManager.registerTransition(location, time, direction);
+        AutoCheckerTransitionManager.getInstance(context).
+                registerTransition(location, time, direction);
 
-        notificationManager.notifyTransition(location, time);
+        AutoCheckerNotificationManager.getInstance(context).notifyTransition(location, time);
     }
 
     private long calculateDelayForRegisterTransition(Location triggerLocation, WatchedLocation wLocation,
@@ -183,7 +201,7 @@ public class AutoCheckerBroadcastReceiver extends BroadcastReceiver {
 
         switch (transition) {
             case Geofence.GEOFENCE_TRANSITION_ENTER:
-            //case Geofence.GEOFENCE_TRANSITION_DWELL:
+                //case Geofence.GEOFENCE_TRANSITION_DWELL:
 
                 return AutoCheckerConstants.DELAY_FOR_STANDARD_TRANSITION;
 

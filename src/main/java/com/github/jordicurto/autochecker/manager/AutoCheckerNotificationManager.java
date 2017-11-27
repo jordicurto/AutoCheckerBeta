@@ -5,13 +5,17 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.provider.Settings;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 
 import com.github.jordicurto.autochecker.R;
 import com.github.jordicurto.autochecker.activity.AutoCheckerMainActivity;
-import com.github.jordicurto.autochecker.data.model.WatchedLocation;
 import com.github.jordicurto.autochecker.constants.AutoCheckerConstants;
+import com.github.jordicurto.autochecker.data.model.WatchedLocation;
 import com.github.jordicurto.autochecker.util.ContextKeeper;
 import com.github.jordicurto.autochecker.util.DateUtils;
+import com.github.jordicurto.autochecker.util.PermissionHelper;
 
 import org.joda.time.LocalDateTime;
 
@@ -20,27 +24,44 @@ import org.joda.time.LocalDateTime;
  */
 public class AutoCheckerNotificationManager extends ContextKeeper {
 
-    public AutoCheckerNotificationManager(Context context) {
+    private NotificationManager nManager;
+
+    private static AutoCheckerNotificationManager mInstance;
+
+    private AutoCheckerNotificationManager(Context context) {
         super(context);
+        nManager = (NotificationManager) mContext
+                .getSystemService(Context.NOTIFICATION_SERVICE);
     }
 
     private Notification buildNotification(int smallIcon, String title, String text) {
+        return buildNotification(smallIcon, title, text, false,
+                new Intent(mContext, AutoCheckerMainActivity.class));
+    }
 
-        return new Notification.Builder(mContext)
+    private Notification buildNotification(int smallIcon, String title, String text,
+                                           boolean ongoing, Intent permIntent) {
+
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(mContext);
+        stackBuilder.addNextIntent(permIntent);
+
+        PendingIntent permPendingIntent =
+                stackBuilder.getPendingIntent(
+                        0,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+
+        return new NotificationCompat.Builder(mContext)
                 .setSmallIcon(smallIcon)
                 .setContentTitle(title)
                 .setContentText(text)
-                .setContentIntent(PendingIntent.getActivity(mContext, 0,
-                        new Intent(mContext, AutoCheckerMainActivity.class),
-                        PendingIntent.FLAG_UPDATE_CURRENT))
+                .setContentIntent(permPendingIntent)
+                .setOngoing(ongoing)
                 .setAutoCancel(true)
                 .build();
     }
 
     public void notifyTransition(WatchedLocation location, long time) {
-
-        NotificationManager nManager = (NotificationManager) mContext
-                .getSystemService(Context.NOTIFICATION_SERVICE);
 
         if (nManager != null) {
 
@@ -61,13 +82,10 @@ public class AutoCheckerNotificationManager extends ContextKeeper {
 
     public void notifyRegisteredGeofence() {
 
-        NotificationManager nManager = (NotificationManager) mContext
-                .getSystemService(Context.NOTIFICATION_SERVICE);
-
         if (nManager != null) {
 
             Notification notification = buildNotification(
-                    R.drawable.ic_notification_register_geofence,
+                    R.drawable.ic_notification_autochecker,
                     mContext.getString(R.string.notification_register_geofence_title,
                             mContext.getString(R.string.app_name)),
                     mContext.getString(R.string.notification_register_geofence_text));
@@ -76,4 +94,49 @@ public class AutoCheckerNotificationManager extends ContextKeeper {
         }
     }
 
+    public void notifyPermissionRequired(String[] permissions, int requestCode) {
+
+        if (nManager != null) {
+
+            Intent permIntent = new Intent(mContext,
+                    PermissionHelper.PermissionRequestActivity.class);
+
+            permIntent.putExtra(AutoCheckerConstants.KEY_PERMISSIONS, permissions);
+            permIntent.putExtra(AutoCheckerConstants.KEY_REQUEST_CODE, requestCode);
+
+            Notification notification = buildNotification(
+                    R.drawable.ic_notification_autochecker,
+                    mContext.getString(R.string.request_permission_title),
+                    mContext.getString(R.string.request_permission_text),
+                    true, permIntent);
+
+            nManager.notify(AutoCheckerConstants.NOTIFICATION_PERMISSION_REQUIRED, notification);
+        }
+    }
+
+    public void notifyEnableLocationRequired() {
+
+        if (nManager != null) {
+
+            Intent permIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+
+            Notification notification = buildNotification(
+                    R.drawable.ic_notification_autochecker,
+                    mContext.getString(R.string.not_enable_location_title),
+                    mContext.getString(R.string.not_emable_location_text),
+                    true, permIntent);
+
+            nManager.notify(AutoCheckerConstants.NOTIFICATION_ENABLE_LOCATION, notification);
+        }
+    }
+
+    public void cancelNotification(int id) {
+        nManager.cancel(id);
+    }
+
+    public static AutoCheckerNotificationManager getInstance(Context context) {
+        if (mInstance == null)
+            mInstance = new AutoCheckerNotificationManager(context);
+        return mInstance;
+    }
 }

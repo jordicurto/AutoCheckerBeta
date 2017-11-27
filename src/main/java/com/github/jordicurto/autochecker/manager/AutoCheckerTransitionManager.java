@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.database.SQLException;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.github.jordicurto.autochecker.data.AutoCheckerDataSource;
@@ -31,7 +32,9 @@ public class AutoCheckerTransitionManager extends ContextKeeper {
     public static final int ENTER_TRANSITION = 0;
     public static final int LEAVE_TRANSITION = 1;
 
-    public AutoCheckerTransitionManager(Context context) {
+    private static AutoCheckerTransitionManager mInstance;
+
+    private AutoCheckerTransitionManager(Context context) {
         super(context);
     }
 
@@ -82,7 +85,7 @@ public class AutoCheckerTransitionManager extends ContextKeeper {
         mContext.sendBroadcast(intentAct);
     }
 
-    private void registerEnterTransition(WatchedLocation location, long time) {
+    public void registerEnterTransition(WatchedLocation location, long time) {
 
         if (location != null) {
 
@@ -93,7 +96,7 @@ public class AutoCheckerTransitionManager extends ContextKeeper {
         }
     }
 
-    private void registerLeaveTransition(WatchedLocation location, long time) {
+    public void registerLeaveTransition(WatchedLocation location, long time) {
 
         if (location != null) {
 
@@ -102,5 +105,11 @@ public class AutoCheckerTransitionManager extends ContextKeeper {
             AutoCheckerBusinessManager.getManager(mContext).updateCheckOutRecord(location,
                     new LocalDateTime(time));
         }
+    }
+
+    public static AutoCheckerTransitionManager getInstance(Context context) {
+        if (mInstance == null)
+            mInstance = new AutoCheckerTransitionManager(context);
+        return mInstance;
     }
 }

@@ -1,16 +1,23 @@
 apply plugin: 'com.android.application'
 
 android {
+        signingConfigs {
+        androidKey {
+            keyAlias 'AndroidKey'
+            keyPassword 'curtom253085'
+            storeFile file('/home/jordi/devel/keystores/android.jks')
+            storePassword 'indepe'
+        }
+    }
     compileSdkVersion 25
-    buildToolsVersion '25.0.3'
-
     defaultConfig {
         applicationId "com.github.jordicurto.autochecker"
         minSdkVersion 17
         targetSdkVersion 25
-        versionCode 1
-        versionName "1.0-GTD"
+        versionCode 2
+        versionName "1.1-GTD"
         vectorDrawables.useSupportLibrary = true
+        signingConfig signingConfigs.androidKey
     }
     buildTypes {
         release {
@@ -18,10 +25,13 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    productFlavors {
+    }
 }
 
 repositories {
     maven { url "https://jitpack.io" }
+    maven { url "https://maven.google.com" }
 }
 
 
@@ -33,18 +43,18 @@ repositories {
 
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:25.3.1'
-    compile 'com.android.support:design:25.3.1'
-    compile 'com.android.support:recyclerview-v7:25.3.1'
-    compile 'com.android.support:support-v4:25.3.1'
-    compile 'com.google.android.gms:play-services-location:10.0.1'
-    compile 'com.google.android.gms:play-services-maps:10.0.1'
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile 'com.android.support:appcompat-v7:25.4.0'
+    compile 'com.android.support:design:25.4.0'
+    compile 'com.android.support:recyclerview-v7:25.4.0'
+    compile 'com.android.support:support-v4:25.4.0'
+    compile 'com.google.android.gms:play-services-location:11.6.0'
+    compile 'com.google.android.gms:play-services-maps:11.6.0'
     compile 'com.github.PhilJay:MPAndroidChart:v3.0.2'
-    compile 'com.android.support.constraint:constraint-layout:1.0.0-beta4'
+    compile 'com.android.support.constraint:constraint-layout:1.1.0-beta3'
     compile 'com.github.aakira:expandable-layout:1.6.0@aar'
     compile 'net.danlew:android.joda:2.9.5.1'
     compile 'com.bignerdranch.android:expandablerecyclerview:3.0.0-RC1'
-    compile 'com.android.support:support-vector-drawable:25.3.1'
+    compile 'com.android.support:support-vector-drawable:25.4.0'
     testCompile 'junit:junit:4.12'
 }

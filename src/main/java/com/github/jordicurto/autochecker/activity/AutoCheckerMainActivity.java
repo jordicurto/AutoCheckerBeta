@@ -16,6 +16,7 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -39,7 +40,9 @@ import com.github.jordicurto.autochecker.R;
 import com.github.jordicurto.autochecker.constants.AutoCheckerConstants;
 import com.github.jordicurto.autochecker.data.model.WatchedLocation;
 import com.github.jordicurto.autochecker.fragment.AutoCheckerWeekRecordsFragment;
+import com.github.jordicurto.autochecker.geofence.AutoCheckerGeofencingClient;
 import com.github.jordicurto.autochecker.manager.AutoCheckerBusinessManager;
+import com.github.jordicurto.autochecker.manager.AutoCheckerNotificationManager;
 import com.github.jordicurto.autochecker.util.DateUtils;
 
 import org.joda.time.Interval;
@@ -243,12 +246,18 @@ public class AutoCheckerMainActivity extends AppCompatActivity implements
                                            @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if(grantResults[0] == PackageManager.PERMISSION_GRANTED)
+        if(grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            AutoCheckerNotificationManager.getInstance(this).cancelNotification(
+                    AutoCheckerConstants.NOTIFICATION_PERMISSION_REQUIRED);
             requestRegisterGeofences();
+        } else {
+            AutoCheckerNotificationManager.getInstance(this).notifyPermissionRequired(
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
+        }
     }
 
     private void requestRegisterGeofences() {
-        sendBroadcast(new Intent(AutoCheckerConstants.INTENT_REQUEST_REGISTER_GEOFENCES));
+        sendBroadcast(new Intent(AutoCheckerConstants.INTENT_REQUEST_CHECK_LOCATION));
     }
 
     @Override

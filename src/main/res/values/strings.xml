@@ -1,17 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="action_settings">Settings</string>
-    <string name="title_activity_auto_checker_records">AutoCheckerRecordsActivity</string>
-    <string name="section_format">Hello World from section: %1$d</string>
-    <string name="title_activity_test">TestActivity</string>
-
     <string name="week_day">Week day</string>
     <string name="location_name">Name</string>
     <string name="inside_location">Inside</string>
     <string name="outside_location">Outside</string>
     <string name="empty_locations_list">No locations found</string>
-    <string name="first_last_day_record">00:00 - 00:00</string>
-    <string name="record_duration">00:00</string>
+    <string name="first_last_day_record" translatable="false">00:00 - 00:00</string>
+    <string name="record_duration" translatable="false">00:00</string>
     <string name="total_duration">Total</string>
 
     <string name="inside_location_text">You\'re in %1$s</string>
@@ -21,22 +17,22 @@
     <string name="notification_title_leave">You left %1$s</string>
 
     <string name="notification_text">Event registered at %1$s</string>
-    <string name="title_activity_auto_checker_main">AutoCheckerMainActivity</string>
     <string name="inside_outside_menu">Are you inside?</string>
     <string name="request_permission_title">Permissions request</string>
     <string name="request_permission_text">Application needs permissions to run</string>
     <string name="notification_register_geofence_title">%1$s is running</string>
     <string name="notification_register_geofence_text">Application is now tracking your location</string>
     <string name="title_activity_auto_checker_settings">Settings</string>
-    <string name="title_activity_draw_test">DrawTest</string>
 
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="title_activity_auto_checker_new_main">AutoCheckerNewMainActivity</string>
+    <string name="navigation_drawer_open">Open location list</string>
+    <string name="navigation_drawer_close">Close location list</string>
+
     <string name="location_list_title">Locations</string>
 
     <string name="show_weekends_pref_summary">Whether show weekend days in record list</string>
     <string name="show_weekends_pref_title">Show weekends</string>
     <string name="pref_header_general">General</string>
+    <string name="not_enable_location_title">Enable location</string>
+    <string name="not_emable_location_text">Application needs access to location services</string>
 
 </resources>

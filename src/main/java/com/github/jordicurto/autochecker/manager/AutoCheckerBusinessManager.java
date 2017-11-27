@@ -251,4 +251,22 @@ public class AutoCheckerBusinessManager {
 
         return records;
     }
+
+    public void forceLeaveCurrentLocations(LocalDateTime checkOut) {
+
+        try {
+
+            dataSource.open();
+            List<WatchedLocation> locations = dataSource.getAllWatchedLocations();
+            for (WatchedLocation location : locations) {
+                updateCheckOutRecord(location, checkOut);
+            }
+            dataSource.close();
+
+        } catch (SQLException e) {
+            Log.e(TAG, "DataSource exception", e);
+        } finally {
+            dataSource.close();
+        }
+    }
 }
