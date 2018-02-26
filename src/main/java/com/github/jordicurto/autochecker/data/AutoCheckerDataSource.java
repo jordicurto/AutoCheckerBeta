@@ -1,16 +1,11 @@
 package com.github.jordicurto.autochecker.data;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
-import android.util.Pair;
 
 import com.github.jordicurto.autochecker.data.exception.NoLocationFoundException;
 import com.github.jordicurto.autochecker.data.exception.NoRecordFoundException;
@@ -18,12 +13,12 @@ import com.github.jordicurto.autochecker.data.model.WatchedLocation;
 import com.github.jordicurto.autochecker.data.model.WatchedLocationRecord;
 import com.github.jordicurto.autochecker.util.DateUtils;
 
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeUtils;
 import org.joda.time.Duration;
 import org.joda.time.Interval;
 import org.joda.time.LocalDateTime;
-import org.joda.time.chrono.StrictChronology;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class AutoCheckerDataSource {
 
@@ -102,7 +97,8 @@ public class AutoCheckerDataSource {
 
 		Cursor cursor = database.query(AutoCheckerSQLiteOpenHelper.TABLE_LOCATIONS_NAME,
 				AutoCheckerSQLiteOpenHelper.COLUMNS_TABLE_LOCATIONS,
-				AutoCheckerSQLiteOpenHelper.COLUMN_NAME + " = \"" + location.getName() + "\"", null, null, null, null);
+                AutoCheckerSQLiteOpenHelper.COLUMN_NAME + " = \"" + location.getName() + "\"",
+                null, null, null, null);
 
 		if (!cursor.moveToFirst()) {
 			database.insert(AutoCheckerSQLiteOpenHelper.TABLE_LOCATIONS_NAME, null,
@@ -118,7 +114,8 @@ public class AutoCheckerDataSource {
 
 		Cursor cursor = database.query(AutoCheckerSQLiteOpenHelper.TABLE_LOCATIONS_NAME,
 				AutoCheckerSQLiteOpenHelper.COLUMNS_TABLE_LOCATIONS,
-				AutoCheckerSQLiteOpenHelper.COLUMN_ID + " = " + locationId, null, null, null, null);
+                AutoCheckerSQLiteOpenHelper.COLUMN_ID + " = " + locationId,
+                null, null, null, null);
 
 		WatchedLocation location = new WatchedLocation();
 
@@ -139,7 +136,8 @@ public class AutoCheckerDataSource {
 
 		Cursor cursor = database.query(AutoCheckerSQLiteOpenHelper.TABLE_LOCATIONS_NAME,
 				AutoCheckerSQLiteOpenHelper.COLUMNS_TABLE_LOCATIONS,
-				AutoCheckerSQLiteOpenHelper.COLUMN_NAME + " like '" + locationName + "'", null, null, null, null);
+                AutoCheckerSQLiteOpenHelper.COLUMN_NAME + " like '" + locationName + "'",
+                null, null, null, null);
 
 		WatchedLocation location = new WatchedLocation();
 
@@ -162,7 +160,7 @@ public class AutoCheckerDataSource {
 				AutoCheckerSQLiteOpenHelper.COLUMNS_TABLE_LOCATIONS, null, null, null, null,
 				AutoCheckerSQLiteOpenHelper.COLUMN_ID + " asc");
 
-		List<WatchedLocation> locations = new ArrayList<WatchedLocation>();
+        List<WatchedLocation> locations = new ArrayList<>();
 
 		while (cursor.moveToNext()) {
 			WatchedLocation location = new WatchedLocation();
@@ -220,9 +218,10 @@ public class AutoCheckerDataSource {
 
 		Cursor cursor = database.query(AutoCheckerSQLiteOpenHelper.TABLE_RECORDS_NAME,
 				AutoCheckerSQLiteOpenHelper.COLUMNS_TABLE_RECORDS,
-				AutoCheckerSQLiteOpenHelper.COLUMN_LOCATION_ID + " = " + location.getId(), null, null, null, null);
+                AutoCheckerSQLiteOpenHelper.COLUMN_LOCATION_ID + " = " + location.getId(),
+                null, null, null, null);
 
-		List<WatchedLocationRecord> records = new ArrayList<WatchedLocationRecord>();
+        List<WatchedLocationRecord> records = new ArrayList<>();
 
 		while (cursor.moveToNext()) {
 			WatchedLocationRecord record = new WatchedLocationRecord();
@@ -239,19 +238,21 @@ public class AutoCheckerDataSource {
 																		Interval interval,
                                                                         int startHourDay) {
 
-        DateTime start = interval.getStart().plusHours(startHourDay);
-        DateTime end = interval.getEnd().plusHours(startHourDay);
+        long start = interval.getStart().plusHours(startHourDay).getMillis();
+        long end = interval.getEnd().plusHours(startHourDay).getMillis();
 
 		Cursor cursor = database.query(AutoCheckerSQLiteOpenHelper.TABLE_RECORDS_NAME,
 				AutoCheckerSQLiteOpenHelper.COLUMNS_TABLE_RECORDS,
 				AutoCheckerSQLiteOpenHelper.COLUMN_LOCATION_ID + " = " + location.getId() + " and "
 						+ AutoCheckerSQLiteOpenHelper.COLUMN_CHECKIN + " between "
-                        + start.getMillis() + " and " + end.getMillis() + " or "
-						+ AutoCheckerSQLiteOpenHelper.COLUMN_CHECKOUT + " between "
-						+ start.getMillis() + " and " + end.getMillis(),
-				null, null, null, AutoCheckerSQLiteOpenHelper.COLUMN_CHECKIN + " asc");
+                        + start + " and " + end + " or "
+                        + AutoCheckerSQLiteOpenHelper.COLUMN_CHECKOUT + " between "
+                        + start + " and " + end + " or "
+                        + AutoCheckerSQLiteOpenHelper.COLUMN_CHECKIN + " <= " + start + " and "
+                        + AutoCheckerSQLiteOpenHelper.COLUMN_CHECKOUT + " >= " + end,
+                null, null, null, AutoCheckerSQLiteOpenHelper.COLUMN_CHECKIN + " asc");
 
-		List<WatchedLocationRecord> records = new ArrayList<WatchedLocationRecord>();
+        List<WatchedLocationRecord> records = new ArrayList<>();
 
 		while (cursor.moveToNext()) {
 			WatchedLocationRecord record = new WatchedLocationRecord();
@@ -272,8 +273,9 @@ public class AutoCheckerDataSource {
 
 		Cursor cursor = database.query(AutoCheckerSQLiteOpenHelper.TABLE_RECORDS_NAME,
 				AutoCheckerSQLiteOpenHelper.COLUMNS_TABLE_RECORDS,
-				AutoCheckerSQLiteOpenHelper.COLUMN_LOCATION_ID + " = " + location.getId(), null, null, null,
-				AutoCheckerSQLiteOpenHelper.COLUMN_CHECKIN + " asc");
+                AutoCheckerSQLiteOpenHelper.COLUMN_LOCATION_ID + " = " + location.getId(),
+                null, null, null,
+                AutoCheckerSQLiteOpenHelper.COLUMN_CHECKIN + " asc");
 
 		WatchedLocationRecord firstRecord = new WatchedLocationRecord();
 		WatchedLocationRecord lastRecord = new WatchedLocationRecord();
@@ -309,8 +311,9 @@ public class AutoCheckerDataSource {
 
 		Cursor cursor = database.query(AutoCheckerSQLiteOpenHelper.TABLE_RECORDS_NAME,
 				AutoCheckerSQLiteOpenHelper.COLUMNS_TABLE_RECORDS,
-				AutoCheckerSQLiteOpenHelper.COLUMN_LOCATION_ID + " = " + location.getId(), null, null, null,
-				AutoCheckerSQLiteOpenHelper.COLUMN_CHECKOUT + " desc");
+                AutoCheckerSQLiteOpenHelper.COLUMN_LOCATION_ID + " = " + location.getId(),
+                null, null, null,
+                AutoCheckerSQLiteOpenHelper.COLUMN_CHECKOUT + " desc");
 
 		WatchedLocationRecord record = new WatchedLocationRecord();
 
@@ -327,10 +330,30 @@ public class AutoCheckerDataSource {
 		return record;
 	}
 
-	public void removeLastWatchedLocationRecord(WatchedLocation location) throws NoRecordFoundException {
+    public void removeLastWatchedLocationRecord(WatchedLocation location) throws NoRecordFoundException {
 
-		WatchedLocationRecord record = getUnCheckedWatchedLocationRecord(location);
-		database.delete(AutoCheckerSQLiteOpenHelper.TABLE_RECORDS_NAME,
-				AutoCheckerSQLiteOpenHelper.COLUMN_ID + " = " + record.getId(), null);
-	}
+        WatchedLocationRecord record = getUnCheckedWatchedLocationRecord(location);
+        database.delete(AutoCheckerSQLiteOpenHelper.TABLE_RECORDS_NAME,
+                AutoCheckerSQLiteOpenHelper.COLUMN_ID + " = " + record.getId(), null);
+    }
+
+    public int removeRecordsToDate(LocalDateTime limitDate) {
+
+        return database.delete(AutoCheckerSQLiteOpenHelper.TABLE_RECORDS_NAME,
+                AutoCheckerSQLiteOpenHelper.COLUMN_CHECKOUT + " <= "
+                        + limitDate.toDateTime().getMillis(), null);
+    }
+
+    public int removeFutureRecords() {
+
+        return database.delete(AutoCheckerSQLiteOpenHelper.TABLE_RECORDS_NAME,
+                AutoCheckerSQLiteOpenHelper.COLUMN_CHECKIN + " > " +
+                        DateUtils.getCurrentDate().toDateTime().getMillis(), null);
+    }
+
+    public void removeRecord(WatchedLocationRecord record) {
+
+        database.delete(AutoCheckerSQLiteOpenHelper.TABLE_RECORDS_NAME,
+                AutoCheckerSQLiteOpenHelper.COLUMN_ID + " = " + record.getId(), null);
+    }
 }

@@ -7,12 +7,12 @@
     <dimen name="appbar_padding_top">8dp</dimen>
     <dimen name="text_margin">16dp</dimen>
 
-    <dimen name="week_day_dim">12pt</dimen>
+    <dimen name="week_day_dim">11pt</dimen>
     <dimen name="common_dim">9pt</dimen>
     <dimen name="hours_record_dim">8pt</dimen>
-    <dimen name="total_hours_dim">18pt</dimen>
+    <dimen name="total_hours_dim">16pt</dimen>
     <dimen name="total_hours_day_dim">14pt</dimen>
-    <dimen name="total_text_dim">16pt</dimen>
+    <dimen name="total_text_dim">14pt</dimen>
     <dimen name="check_hour_dim">10pt</dimen>
     <dimen name="nav_header_vertical_spacing">16dp</dimen>
     <dimen name="nav_header_height">160dp</dimen>

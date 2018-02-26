@@ -1,9 +1,0 @@
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <CheckBoxPreference
-        android:defaultValue="false"
-        android:key="PREF_SHOW_WEEKENDS"
-        android:summary="@string/show_weekends_pref_summary"
-        android:title="@string/show_weekends_pref_title" />
-
-</PreferenceScreen>

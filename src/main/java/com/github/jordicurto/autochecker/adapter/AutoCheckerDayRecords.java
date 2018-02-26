@@ -3,6 +3,7 @@ package com.github.jordicurto.autochecker.adapter;
 import com.bignerdranch.expandablerecyclerview.model.Parent;
 import com.github.jordicurto.autochecker.constants.AutoCheckerConstants;
 import com.github.jordicurto.autochecker.data.model.WatchedLocationRecord;
+import com.github.jordicurto.autochecker.manager.AutoCheckerPreferencesManager;
 import com.github.jordicurto.autochecker.util.DateUtils;
 
 import org.joda.time.DateTime;
@@ -14,27 +15,45 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by jordi on 22/05/16.
+ *
  */
 public class AutoCheckerDayRecords implements Parent<AutoCheckerDayPartRecords> {
 
     private DateTime weekDay;
     private Duration duration;
+    private AutoCheckerPreferencesManager prefsManager;
     private List<WatchedLocationRecord> mRecords;
 
     private List<Interval> dayPartIntervals;
 
     private List<AutoCheckerDayPartRecords> children = new ArrayList<>();
 
-    public AutoCheckerDayRecords(Interval interval, int startHourDay,
-                                 List<WatchedLocationRecord> records) {
+    public AutoCheckerDayRecords(Interval interval,
+                                 List<WatchedLocationRecord> records,
+                                 AutoCheckerPreferencesManager preferencesManager) {
 
         mRecords = records;
-        weekDay = interval.getStart().plusHours(startHourDay).toDateTime();
-        duration = DateUtils.calculateDuration(records, interval, startHourDay);
+        prefsManager = preferencesManager;
+        weekDay = interval.getStart().plusHours(preferencesManager.getStartDayHour()).toDateTime();
+        filterRecords();
+        duration = DateUtils.calculateDuration(mRecords);
         dayPartIntervals = new ArrayList<>();
         initDayPartIntervals();
         createChildren();
+    }
+
+    private void filterRecords() {
+        DateTime weekDayEnd = weekDay.plusDays(1).minusSeconds(1);
+        for (WatchedLocationRecord record : mRecords) {
+            if (record.getCheckIn().toDateTime().isBefore(weekDay)) {
+                record.setCheckIn(weekDay.toLocalDateTime());
+            }
+
+            if (record.isActive() ? DateUtils.getCurrentDate().toDateTime().isAfter(weekDayEnd) :
+                    record.getCheckOut().toDateTime().isAfter(weekDayEnd)) {
+                record.setCheckOut(weekDayEnd.toLocalDateTime());
+            }
+        }
     }
 
     private void initDayPartIntervals() {
@@ -92,7 +111,8 @@ public class AutoCheckerDayRecords implements Parent<AutoCheckerDayPartRecords> 
     }
 
     public String getDurationString() {
-        return DateUtils.getDurationString(duration);
+        return DateUtils.getDurationString(duration, prefsManager.isRelativeDurations(),
+                prefsManager.getDuration(DateUtils.INTERVAL_TYPE.DAYS));
     }
 
     public List<WatchedLocationRecord> getRecords() {

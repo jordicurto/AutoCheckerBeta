@@ -1,7 +1,5 @@
 package com.github.jordicurto.autochecker;
 
-import java.util.Calendar;
-
 import android.util.Log;
 
 import com.github.jordicurto.autochecker.util.DateUtils;
@@ -10,6 +8,11 @@ import junit.framework.TestCase;
 
 import org.joda.time.Interval;
 import org.joda.time.LocalDate;
+import org.joda.time.Period;
+import org.joda.time.format.PeriodFormatter;
+import org.joda.time.format.PeriodFormatterBuilder;
+
+import java.util.Calendar;
 
 public class AutoCheckerUtilTest extends TestCase {
 
@@ -44,7 +47,15 @@ public class AutoCheckerUtilTest extends TestCase {
 				DateUtils.INTERVAL_TYPE.MONTHS)) {
 			Log.d(TAG, i.toString());
 		}
-	}
+
+        Period p = new Period(-1 * (2 * DateUtils.HOURS_PER_MILLISECOND) + (30 * DateUtils.MINS_PER_MILLISECOND));
+        PeriodFormatter formatter = new PeriodFormatterBuilder().
+                printZeroAlways().minimumPrintedDigits(2)
+                .appendHours().appendLiteral(":").rejectSignedValues(true).appendMinutes().toFormatter();
+
+        Log.d(TAG, formatter.print(p));
+        Log.d(TAG, formatter.print(p.negated()));
+    }
 
 	public AutoCheckerUtilTest () {
 

@@ -4,7 +4,7 @@ import android.content.Context;
 
 public abstract class ContextKeeper {
 
-	protected Context mContext;
+    private final Context mContext;
 
 	public ContextKeeper(Context context) {
 		mContext = context;

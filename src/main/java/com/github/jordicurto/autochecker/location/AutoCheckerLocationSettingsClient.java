@@ -3,7 +3,6 @@ package com.github.jordicurto.autochecker.location;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.github.jordicurto.autochecker.constants.AutoCheckerConstants;
@@ -30,6 +29,8 @@ public class AutoCheckerLocationSettingsClient extends ContextKeeper {
 
     private final SettingsClient mSettingsClient;
 
+    private final LocationRequest mLocationRequest = new LocationRequest();
+
     private static AutoCheckerLocationSettingsClient mInstance;
 
     private AutoCheckerLocationSettingsClient(Context context) {
@@ -38,8 +39,10 @@ public class AutoCheckerLocationSettingsClient extends ContextKeeper {
     }
 
     public void checkLocationSettings() {
-        LocationRequest mLocationRequest = new LocationRequest();
         mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+        mLocationRequest.setInterval(AutoCheckerConstants.INTERVAL_BETWEEN_LOCATION_UPDATES);
+        mLocationRequest.setFastestInterval(
+                AutoCheckerConstants.FASTEST_INTERVAL_BETWEEN_LOCATION_UPDATES);
 
         LocationSettingsRequest request = new LocationSettingsRequest.Builder()
                 .addLocationRequest(mLocationRequest).build();
@@ -50,9 +53,9 @@ public class AutoCheckerLocationSettingsClient extends ContextKeeper {
             @Override
             public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
                 Log.i(TAG, "Location settings are OK");
-                mContext.sendBroadcast(
+                getContext().sendBroadcast(
                         new Intent(AutoCheckerConstants.INTENT_REQUEST_REGISTER_GEOFENCES));
-                AutoCheckerNotificationManager.getInstance(mContext).cancelNotification(
+                AutoCheckerNotificationManager.getInstance(getContext()).cancelNotification(
                         AutoCheckerConstants.NOTIFICATION_ENABLE_LOCATION);
             }
         });
@@ -63,7 +66,7 @@ public class AutoCheckerLocationSettingsClient extends ContextKeeper {
                 Log.w(TAG, "Location settings are not OK");
                 int statusCode = ((ApiException) e).getStatusCode();
                 if (statusCode == CommonStatusCodes.RESOLUTION_REQUIRED) {
-                    AutoCheckerNotificationManager.getInstance(mContext).
+                    AutoCheckerNotificationManager.getInstance(getContext()).
                             notifyEnableLocationRequired();
                 }
             }

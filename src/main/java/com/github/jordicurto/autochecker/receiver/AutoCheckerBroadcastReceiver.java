@@ -8,16 +8,15 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.github.jordicurto.autochecker.constants.AutoCheckerConstants;
 import com.github.jordicurto.autochecker.data.model.WatchedLocation;
 import com.github.jordicurto.autochecker.geofence.AutoCheckerGeofencingClient;
 import com.github.jordicurto.autochecker.location.AutoCheckerLocationSettingsClient;
 import com.github.jordicurto.autochecker.manager.AutoCheckerBusinessManager;
 import com.github.jordicurto.autochecker.manager.AutoCheckerNotificationManager;
 import com.github.jordicurto.autochecker.manager.AutoCheckerTransitionManager;
-import com.github.jordicurto.autochecker.constants.AutoCheckerConstants;
 import com.github.jordicurto.autochecker.util.DateUtils;
 import com.github.jordicurto.autochecker.util.LocationUtils;
 import com.google.android.gms.location.Geofence;
@@ -38,39 +37,63 @@ public class AutoCheckerBroadcastReceiver extends BroadcastReceiver {
 
         String action = intent.getAction();
 
-        Log.d(TAG, "Intent received " + action);
+        if (action != null) {
 
-        if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
+            Log.d(TAG, "Intent received " + action);
 
-            checkPermission(context);
+            switch (action) {
+                case Intent.ACTION_BOOT_COMPLETED:
 
-        } else if (action.equals(AutoCheckerConstants.INTENT_PERMISSION_GRANTED) ||
-                action.equals(AutoCheckerConstants.INTENT_REQUEST_CHECK_LOCATION) ||
-                action.equals(LocationManager.PROVIDERS_CHANGED_ACTION)) {
+                    housekeeping(context);
 
-            AutoCheckerLocationSettingsClient.getInstance(context).checkLocationSettings();
+                    checkPermission(context);
 
-        } else if (action.equals(AutoCheckerConstants.INTENT_REQUEST_REGISTER_GEOFENCES)) {
+                    break;
+                case AutoCheckerConstants.INTENT_PERMISSION_GRANTED:
+                case AutoCheckerConstants.INTENT_REQUEST_CHECK_LOCATION:
+                case LocationManager.PROVIDERS_CHANGED_ACTION:
 
-            registerGeofences(context);
+                    AutoCheckerLocationSettingsClient.getInstance(context).checkLocationSettings();
 
-        } else if (action.equals(Intent.ACTION_SHUTDOWN) ||
-                action.equals("android.intent.action.QUICKBOOT_POWEROFF")) {
+                    break;
+                case AutoCheckerConstants.INTENT_REQUEST_REGISTER_GEOFENCES:
 
-            leaveAndUnregisterGeofences(context);
+                    registerGeofences(context);
 
-        } else if (action.equals(AutoCheckerConstants.GEOFENCE_TRANSITION_RECEIVED)) {
+                    break;
+                case Intent.ACTION_SHUTDOWN:
+                case "android.intent.action.QUICKBOOT_POWEROFF":
 
-            handleTransition(context, intent);
+                    leaveAndUnregisterGeofences(context);
 
-        } else if (action.equals(AutoCheckerConstants.GEOFENCE_TRANSITION_CONFIRM_RECEIVED)) {
+                    break;
+                case AutoCheckerConstants.GEOFENCE_TRANSITION_RECEIVED:
 
-            handleConfirmTransition(context, intent);
+                    handleTransition(context, intent);
 
-        } else {
+                    break;
+                case AutoCheckerConstants.GEOFENCE_TRANSITION_CONFIRM_RECEIVED:
 
-            Log.e(TAG, "Unmatched intent");
+                    handleConfirmTransition(context, intent);
+
+                    break;
+                case AutoCheckerConstants.ALARM_NOTIFICATION_DURATION:
+
+                    // ??
+
+                    break;
+                default:
+
+                    Log.e(TAG, "Unmatched intent");
+                    break;
+            }
         }
+    }
+
+    private void housekeeping(Context context) {
+
+        AutoCheckerBusinessManager.getManager(context).cleanOldWatchedLocationRecords(
+                AutoCheckerConstants.RECORDS_HOLD_DURATION);
     }
 
     private void checkPermission(Context context) {
@@ -180,7 +203,8 @@ public class AutoCheckerBroadcastReceiver extends BroadcastReceiver {
         WatchedLocation location = AutoCheckerBusinessManager.getManager(context).
                 getWatchedLocation(intent.getIntExtra(AutoCheckerConstants.LOCATION_ID, 0));
         long time = intent.getLongExtra(AutoCheckerConstants.TRANSITION_TIME, 0);
-        int direction = intent.getIntExtra(AutoCheckerConstants.TRANSITION_DIRECTION, AutoCheckerTransitionManager.LEAVE_TRANSITION);
+        int direction = intent.getIntExtra(AutoCheckerConstants.TRANSITION_DIRECTION,
+                AutoCheckerTransitionManager.LEAVE_TRANSITION);
 
         AutoCheckerTransitionManager.getInstance(context).
                 registerTransition(location, time, direction);

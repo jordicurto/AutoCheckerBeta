@@ -25,13 +25,46 @@
     <string name="notification_register_geofence_title">%1$s s\'està executant</string>
     <string name="notification_register_geofence_text">L\'aplicació ara està seguint la teva ubicació</string>
     <string name="location_list_title">Ubicacions</string>
-    <string name="show_weekends_pref_summary">Indica si han de ser visibles els dies del cap de setmana</string>
-    <string name="show_weekends_pref_title">Mostrar caps de setmana</string>
-    <string name="pref_header_general">General</string>
+    <string name="pref_summary_show_weekends">Indica si han de ser visibles els dies del cap de setmana</string>
+    <string name="pref_title_show_weekends">Mostrar caps de setmana</string>
+
     <string name="title_activity_auto_checker_settings">Configuració</string>
     <string name="navigation_drawer_open">Obrir llistat d\'ubicacions</string>
     <string name="navigation_drawer_close">Tancar llistat d\'ubacions</string>
     <string name="not_enable_location_title">Activa l\'ubicació</string>
-    <string name="not_emable_location_text">L\'applicació necessita accés als serveis d\'ubicació</string>
+    <string name="not_enable_location_text">L\'applicació necessita accés als serveis d\'ubicació</string>
+
+    <plurals name="relative_week_text">
+        <item quantity="zero">Aquesta setmana</item>
+        <item quantity="one">Fa una setmana</item>
+        <item quantity="other">Fa %s setmanes</item>
+    </plurals>
+
+    <string-array name="number_str_array">
+        <item>zero</item>
+        <item>una</item>
+        <item>dues</item>
+        <item>tres</item>
+        <item>quatre</item>
+        <item>cinc</item>
+        <item>sis</item>
+        <item>set</item>
+        <item>vuit</item>
+        <item>nou</item>
+        <item>deu</item>
+        <item>onze</item>
+        <item>dotze</item>
+    </string-array>
+    <string name="pref_header_visual">Visual</string>
+    <string name="pref_header_times">Temps</string>
+    <string name="pref_header_notifications">Notificacions</string>
+    <string name="pref_summary_start_day_hour">Es l\'hora del dia quan comença el matí</string>
+    <string name="pref_title_start_day_hour">Hora d\'inici del matí</string>
+    <string name="pref_summary_weeks_to_show">És el número màxim de setmanes visibles</string>
+    <string name="pref_title_weeks_to_show">Numero de setmanes a mostrar</string>
+    <string name="pref_summary_expected_duration_per_day">El temps esperat dins l\'ubicació per dia és ${h:mm}</string>
+    <string name="pref_title_expected_duration_per_day">Temps diari dins l\'ubicació</string>
+    <string name="pref_summary_expected_duration_per_week">El temps esperat dins l\'ubicació per setmana és ${h:mm}</string>
+    <string name="pref_title_expected_duration_per_week">Temps setmanal dins l\'ubicació</string>
 
 </resources>

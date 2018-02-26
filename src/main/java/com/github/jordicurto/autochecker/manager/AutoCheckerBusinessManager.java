@@ -11,6 +11,7 @@ import com.github.jordicurto.autochecker.data.model.WatchedLocation;
 import com.github.jordicurto.autochecker.data.model.WatchedLocationRecord;
 import com.github.jordicurto.autochecker.util.DateUtils;
 
+import org.joda.time.Duration;
 import org.joda.time.Interval;
 import org.joda.time.LocalDateTime;
 
@@ -104,7 +105,8 @@ public class AutoCheckerBusinessManager {
     }
 
     public WatchedLocationRecord createCheckInRecord(WatchedLocation location,
-                                                     LocalDateTime checkIn) {
+                                                     LocalDateTime checkIn,
+                                                     boolean forced) {
 
         WatchedLocationRecord record = new WatchedLocationRecord();
 
@@ -124,7 +126,11 @@ public class AutoCheckerBusinessManager {
                     record.setLocation(location);
                     dataSource.insertRecord(record);
 
-                    Log.i(TAG, "User has entered to " + location.getName());
+                    if (forced) {
+                        Log.i(TAG, "Forced enter event to " + location.getName());
+                    } else {
+                        Log.i(TAG, "User has entered to " + location.getName());
+                    }
 
                     break;
 
@@ -147,7 +153,8 @@ public class AutoCheckerBusinessManager {
     }
 
     public WatchedLocationRecord updateCheckOutRecord(WatchedLocation location,
-                                                      LocalDateTime checkOut) {
+                                                      LocalDateTime checkOut,
+                                                      boolean forced) {
 
         WatchedLocationRecord record = new WatchedLocationRecord();
 
@@ -164,9 +171,18 @@ public class AutoCheckerBusinessManager {
 
                     record = dataSource.getUnCheckedWatchedLocationRecord(location);
                     record.setCheckOut(checkOut);
-                    dataSource.updateRecord(record);
 
-                    Log.i(TAG, "User has left " + location.getName());
+                    if (record.isValid()) {
+                        dataSource.updateRecord(record);
+                        if (forced) {
+                            Log.i(TAG, "Forced leave event from " + location.getName());
+                        } else {
+                            Log.i(TAG, "User has left " + location.getName());
+                        }
+                    } else {
+                        Log.e(TAG, "Trying to update record with check out before check in. Record deleted");
+                        dataSource.removeRecord(record);
+                    }
 
                     break;
 
@@ -235,14 +251,27 @@ public class AutoCheckerBusinessManager {
     public List<WatchedLocationRecord> getIntervalWatchedLocationRecord(
             WatchedLocation location, Interval interval, int startHourDay) {
 
-        List<WatchedLocationRecord> records = new ArrayList<WatchedLocationRecord>();
+        List<WatchedLocationRecord> records = new ArrayList<>();
 
         try {
 
             dataSource.open();
+
             records = dataSource.getIntervalWatchedLocationRecord(location, interval, startHourDay);
+
+            if (location.isInside()) {
+                WatchedLocationRecord uncheckedRecord =
+                        dataSource.getUnCheckedWatchedLocationRecord(location);
+                if (uncheckedRecord.getCheckIn().toDateTime().isBefore(
+                        interval.getStart().plusHours(startHourDay))) {
+                    records.add(uncheckedRecord);
+                }
+            }
+
             dataSource.close();
 
+        } catch (NoRecordFoundException e) {
+            Log.e(TAG, "No unchecked record is found", e);
         } catch (SQLException e) {
             Log.e(TAG, "DataSource exception", e);
         } finally {
@@ -259,9 +288,29 @@ public class AutoCheckerBusinessManager {
             dataSource.open();
             List<WatchedLocation> locations = dataSource.getAllWatchedLocations();
             for (WatchedLocation location : locations) {
-                updateCheckOutRecord(location, checkOut);
+                if (location.isInside())
+                    updateCheckOutRecord(location, checkOut, true);
             }
             dataSource.close();
+
+        } catch (SQLException e) {
+            Log.e(TAG, "DataSource exception", e);
+        } finally {
+            dataSource.close();
+        }
+    }
+
+    public void cleanOldWatchedLocationRecords(Duration recordsToHold) {
+
+        try {
+
+            dataSource.open();
+            int deletedRows = dataSource.removeRecordsToDate(
+                    DateUtils.getCurrentDate().minus(recordsToHold));
+            dataSource.close();
+
+            if (deletedRows > 0)
+                Log.d(TAG, "Clearing old records: Removed " + deletedRows + " rows");
 
         } catch (SQLException e) {
             Log.e(TAG, "DataSource exception", e);

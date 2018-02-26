@@ -6,7 +6,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.provider.Settings;
-import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 
 import com.github.jordicurto.autochecker.R;
@@ -30,19 +29,19 @@ public class AutoCheckerNotificationManager extends ContextKeeper {
 
     private AutoCheckerNotificationManager(Context context) {
         super(context);
-        nManager = (NotificationManager) mContext
+        nManager = (NotificationManager) getContext()
                 .getSystemService(Context.NOTIFICATION_SERVICE);
     }
 
     private Notification buildNotification(int smallIcon, String title, String text) {
         return buildNotification(smallIcon, title, text, false,
-                new Intent(mContext, AutoCheckerMainActivity.class));
+                new Intent(getContext(), AutoCheckerMainActivity.class));
     }
 
     private Notification buildNotification(int smallIcon, String title, String text,
                                            boolean ongoing, Intent permIntent) {
 
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(mContext);
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(getContext());
         stackBuilder.addNextIntent(permIntent);
 
         PendingIntent permPendingIntent =
@@ -51,7 +50,7 @@ public class AutoCheckerNotificationManager extends ContextKeeper {
                         PendingIntent.FLAG_UPDATE_CURRENT
                 );
 
-        return new NotificationCompat.Builder(mContext)
+        return new Notification.Builder(getContext())
                 .setSmallIcon(smallIcon)
                 .setContentTitle(title)
                 .setContentText(text)
@@ -69,9 +68,9 @@ public class AutoCheckerNotificationManager extends ContextKeeper {
                     location.getStatus() == WatchedLocation.INSIDE_LOCATION ?
                     R.drawable.ic_enter_notification : R.drawable.ic_exit_notification,
                     (location.getStatus() == WatchedLocation.INSIDE_LOCATION ?
-                        mContext.getString(R.string.notification_title_enter, location.getName()) :
-                        mContext.getString(R.string.notification_title_leave, location.getName())),
-                    mContext.getString(R.string.notification_text,
+                            getContext().getString(R.string.notification_title_enter, location.getName()) :
+                            getContext().getString(R.string.notification_title_leave, location.getName())),
+                    getContext().getString(R.string.notification_text,
                         DateUtils.timeFormat.print(new LocalDateTime(time))));
 
             nManager.notify((location.getStatus() == WatchedLocation.INSIDE_LOCATION ?
@@ -86,9 +85,9 @@ public class AutoCheckerNotificationManager extends ContextKeeper {
 
             Notification notification = buildNotification(
                     R.drawable.ic_notification_autochecker,
-                    mContext.getString(R.string.notification_register_geofence_title,
-                            mContext.getString(R.string.app_name)),
-                    mContext.getString(R.string.notification_register_geofence_text));
+                    getContext().getString(R.string.notification_register_geofence_title,
+                            getContext().getString(R.string.app_name)),
+                    getContext().getString(R.string.notification_register_geofence_text));
 
             nManager.notify(AutoCheckerConstants.NOTIFICATION_REGISTER_GEOFENCE_ID, notification);
         }
@@ -98,7 +97,7 @@ public class AutoCheckerNotificationManager extends ContextKeeper {
 
         if (nManager != null) {
 
-            Intent permIntent = new Intent(mContext,
+            Intent permIntent = new Intent(getContext(),
                     PermissionHelper.PermissionRequestActivity.class);
 
             permIntent.putExtra(AutoCheckerConstants.KEY_PERMISSIONS, permissions);
@@ -106,8 +105,8 @@ public class AutoCheckerNotificationManager extends ContextKeeper {
 
             Notification notification = buildNotification(
                     R.drawable.ic_notification_autochecker,
-                    mContext.getString(R.string.request_permission_title),
-                    mContext.getString(R.string.request_permission_text),
+                    getContext().getString(R.string.request_permission_title),
+                    getContext().getString(R.string.request_permission_text),
                     true, permIntent);
 
             nManager.notify(AutoCheckerConstants.NOTIFICATION_PERMISSION_REQUIRED, notification);
@@ -122,8 +121,8 @@ public class AutoCheckerNotificationManager extends ContextKeeper {
 
             Notification notification = buildNotification(
                     R.drawable.ic_notification_autochecker,
-                    mContext.getString(R.string.not_enable_location_title),
-                    mContext.getString(R.string.not_emable_location_text),
+                    getContext().getString(R.string.not_enable_location_title),
+                    getContext().getString(R.string.not_enable_location_text),
                     true, permIntent);
 
             nManager.notify(AutoCheckerConstants.NOTIFICATION_ENABLE_LOCATION, notification);

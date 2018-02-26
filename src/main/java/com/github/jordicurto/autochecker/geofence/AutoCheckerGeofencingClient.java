@@ -44,7 +44,7 @@ public class AutoCheckerGeofencingClient extends ContextKeeper {
 
     private AutoCheckerGeofencingClient(Context context) {
         super(context);
-        mGeofencingClient = LocationServices.getGeofencingClient(mContext);
+        mGeofencingClient = LocationServices.getGeofencingClient(getContext());
     }
 
     @NonNull
@@ -62,7 +62,7 @@ public class AutoCheckerGeofencingClient extends ContextKeeper {
         if (mGeofencePendingIntent != null) {
             return mGeofencePendingIntent;
         } else {
-            return PendingIntent.getBroadcast(mContext, 0,
+            return PendingIntent.getBroadcast(getContext(), 0,
                     new Intent(AutoCheckerConstants.GEOFENCE_TRANSITION_RECEIVED),
                     PendingIntent.FLAG_UPDATE_CURRENT);
         }
@@ -84,7 +84,7 @@ public class AutoCheckerGeofencingClient extends ContextKeeper {
                 addGeofences(geofencesToAdd).
                 setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER).build();
 
-        if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION)
+        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
 
             Task<Void> task = mGeofencingClient.addGeofences(request, mGeofencePendingIntent);
@@ -92,7 +92,7 @@ public class AutoCheckerGeofencingClient extends ContextKeeper {
             task.addOnSuccessListener(new OnSuccessListener<Void>() {
                 @Override
                 public void onSuccess(Void aVoid) {
-                    AutoCheckerNotificationManager.getInstance(mContext).notifyRegisteredGeofence();
+                    AutoCheckerNotificationManager.getInstance(getContext()).notifyRegisteredGeofence();
                     Log.i(TAG, "Registering successful");
                 }
             });
@@ -105,7 +105,7 @@ public class AutoCheckerGeofencingClient extends ContextKeeper {
                     Log.e(TAG, "Registering failed: " + getErrorString(errorCode));
 
                     if (errorCode == GeofenceStatusCodes.GEOFENCE_NOT_AVAILABLE) {
-                        AutoCheckerNotificationManager.getInstance(mContext).
+                        AutoCheckerNotificationManager.getInstance(getContext()).
                                 notifyEnableLocationRequired();
                     }
                 }
@@ -118,7 +118,6 @@ public class AutoCheckerGeofencingClient extends ContextKeeper {
         mGeofencingClient.removeGeofences(mGeofencePendingIntent);
     }
 
-    @NonNull
     public static String getLocationName(Geofence fence) {
         String reqId = fence.getRequestId();
         if (reqId.length() <= AUTOCHECKER_GEOFENCE_REQ_ID.length())

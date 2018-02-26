@@ -6,8 +6,13 @@ import android.content.pm.PackageManager;
 
 import com.github.jordicurto.autochecker.data.model.WatchedLocationRecord;
 
-import org.joda.time.*;
+import org.joda.time.DateTimeConstants;
 import org.joda.time.Duration;
+import org.joda.time.Interval;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
+import org.joda.time.Period;
+import org.joda.time.Seconds;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.DateTimeFormatterBuilder;
 import org.joda.time.format.PeriodFormatter;
@@ -61,6 +66,10 @@ public class DateUtils {
         public int getIndex() {
             return index;
         }
+
+        public int size() {
+            return MONTHS.getIndex() + 1;
+        }
     }
 
     public enum PART_OF_DAY {
@@ -107,15 +116,15 @@ public class DateUtils {
 
             if (intervalType == INTERVAL_TYPE.WEEKS) {
                 interval = startDate.toInterval().withPeriodAfterStart(
-                        Period.weeks(1).minusMinutes(1));
+                        Period.weeks(1).minusSeconds(1));
                 startDate = startDate.plusWeeks(1);
             } else if (intervalType == INTERVAL_TYPE.MONTHS) {
                 interval = startDate.toInterval().withPeriodAfterStart(
-                        Period.months(1).minusMinutes(1));
+                        Period.months(1).minusSeconds(1));
                 startDate = startDate.plusMonths(1);
             } else {
                 interval = startDate.toInterval().withPeriodAfterStart(
-                        Period.days(1).minusMinutes(1));
+                        Period.days(1).minusSeconds(1));
                 startDate = startDate.plusDays(1);
             }
 
@@ -141,33 +150,47 @@ public class DateUtils {
                 DateTimeConstants.SUNDAY : DateTimeConstants.FRIDAY);
     }
 
-    public static Duration calculateDuration(WatchedLocationRecord record, Interval weekDay,
-                                             int startHourDay) {
+    public static long roundSecondsToMinutes(int seconds) {
+        return Math.round((seconds * 1.0) / (DateTimeConstants.SECONDS_PER_MINUTE * 1.0));
+    }
+
+    public static Duration calculateDuration(WatchedLocationRecord record) {
         Duration checkDuration = Duration.ZERO;
-        LocalDateTime start = weekDay.getStart().plusHours(startHourDay).toLocalDateTime();
-        LocalDateTime end = weekDay.getEnd().plusHours(startHourDay).toLocalDateTime();
         if (record.getCheckIn() != null) {
-            checkDuration = Duration.standardSeconds(
-                Seconds.secondsBetween(
-                        (start.isAfter(record.getCheckIn()) ? start : record.getCheckIn()),
-                        record.isActive() ? getCurrentDate() :
-                            (end.isBefore(record.getCheckOut()) ? end : record.getCheckOut()))
-                        .getSeconds());
+            int seconds = Seconds.secondsBetween(record.getCheckIn(),
+                    record.isActive() ? getCurrentDate() : record.getCheckOut()).
+                    getSeconds();
+            checkDuration = Duration.standardMinutes(roundSecondsToMinutes(seconds));
         }
         return checkDuration;
     }
 
-    public static Duration calculateDuration(List<WatchedLocationRecord> records,
-                                             Interval weekDay, int startHourDay) {
-        Duration checksDuration = Duration.ZERO;
-        for(WatchedLocationRecord record : records) {
-            checksDuration = checksDuration.plus(calculateDuration(record, weekDay, startHourDay));
+    public static Duration invertDuration(Duration checksDuration,
+                                          boolean relative,
+                                          Duration relativeMaxDuration) {
+        if (relative) {
+            checksDuration = relativeMaxDuration.minus(checksDuration);
         }
         return checksDuration;
     }
 
-    public static String getDurationString (Duration duration) {
-        return durationFormat.print(duration.toPeriod());
+    public static Duration calculateDuration(List<WatchedLocationRecord> records) {
+        Duration checksDuration = Duration.ZERO;
+        for(WatchedLocationRecord record : records) {
+            checksDuration = checksDuration.plus(calculateDuration(record));
+        }
+        return checksDuration;
+    }
+
+    public static String getDurationString(Duration duration, boolean relative,
+                                           Duration relativeMaxDuration) {
+        String durationStr = "";
+        duration = invertDuration(duration, relative, relativeMaxDuration);
+        if (duration.getMillis() < 0) {
+            durationStr = "-";
+            duration = duration.negated();
+        }
+        return durationStr + durationFormat.print(duration.toPeriod());
     }
 
     public static LocalDateTime getCurrentDate() {
@@ -176,6 +199,11 @@ public class DateUtils {
 
     public static long getCurrentDateMillis() {
         return getCurrentDate().toDateTime().getMillis();
+    }
+
+    public static long getMillisUtilDayChange(int startDayHourOffset) {
+        return ((LocalDateTime.now().toDateTime().getMillis() % DateTimeConstants.MILLIS_PER_DAY) +
+                (startDayHourOffset * DateUtils.HOURS_PER_MILLISECOND));
     }
 
     public static long getApplicationInstallTime(Context context, String appName) {
