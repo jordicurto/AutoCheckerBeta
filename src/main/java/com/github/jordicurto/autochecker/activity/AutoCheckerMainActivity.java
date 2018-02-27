@@ -104,7 +104,7 @@ public class AutoCheckerMainActivity extends AppCompatActivity implements
 
         setContentView(R.layout.autochecker_main);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
@@ -115,10 +115,10 @@ public class AutoCheckerMainActivity extends AppCompatActivity implements
                 getSupportFragmentManager().findFragmentById(R.id.total_week_fragment);
 
         // Set up the ViewPager with the sections adapter.
-        mViewPager = findViewById(R.id.container);
+        mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
-        mTabLayout = findViewById(R.id.tabs);
+        mTabLayout = (TabLayout) findViewById(R.id.tabs);
         mTabLayout.setupWithViewPager(mViewPager);
         mTabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -137,7 +137,7 @@ public class AutoCheckerMainActivity extends AppCompatActivity implements
             }
         });
 
-        mIconSwitch = findViewById(R.id.absolute_relative_switch);
+        mIconSwitch = (IconSwitch) findViewById(R.id.absolute_relative_switch);
         mIconSwitch.setCheckedChangeListener(new IconSwitch.CheckedChangeListener() {
             @Override
             public void onCheckChanged(IconSwitch.Checked current) {
@@ -145,14 +145,14 @@ public class AutoCheckerMainActivity extends AppCompatActivity implements
             }
         });
 
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open,
                 R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = findViewById(R.id.nav_view);
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         checkPermissions();
@@ -207,7 +207,7 @@ public class AutoCheckerMainActivity extends AppCompatActivity implements
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {

@@ -26,7 +26,7 @@ public class AutoCheckerTotalWeekFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_auto_checker_total_week, container, false);
-        mTotalDurationText = view.findViewById(R.id.total_duration);
+        mTotalDurationText = (TextView) view.findViewById(R.id.total_duration);
         return view;
     }
 

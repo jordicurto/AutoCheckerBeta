@@ -52,13 +52,13 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.ACTION_SHUTDOWN" />
                 <action android:name="android.intent.action.QUICKBOOT_POWEROFF" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
                 <action android:name="android.location.PROVIDERS_CHANGED" />
                 <action android:name="GEOFENCE_TRANSITION_RECEIVED" />
                 <action android:name="GEOFENCE_TRANSITION_CONFIRM_RECEIVED" />
                 <action android:name="INTENT_REQUEST_CHECK_LOCATION" />
                 <action android:name="INTENT_PERMISSION_GRANTED" />
                 <action android:name="INTENT_REQUEST_REGISTER_GEOFENCES" />
-                <action android:name="ALARM_HOUSEKEEPING" />
             </intent-filter>
         </receiver>
     </application>

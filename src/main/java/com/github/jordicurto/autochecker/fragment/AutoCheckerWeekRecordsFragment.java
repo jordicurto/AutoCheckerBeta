@@ -78,8 +78,7 @@ public class AutoCheckerWeekRecordsFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_auto_checker_records, container, false);
 
-        recyclerView = view.findViewById(R.id.recordsView);
-        //totalDurationText = view.findViewById(R.id.total_duration);
+        recyclerView = (RecyclerView) view.findViewById(R.id.recordsView);
 
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(mLayoutManager);

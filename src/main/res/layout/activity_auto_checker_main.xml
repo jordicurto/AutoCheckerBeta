@@ -38,8 +38,8 @@
     <android.support.v4.view.ViewPager
         android:id="@+id/container"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="70dp"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="92dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
     <!--
@@ -53,12 +53,15 @@
     <android.support.v7.widget.CardView
         android:id="@+id/bottomSheetLayout"
         android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:layout_alignParentBottom="true"
-        android:elevation="14dp"
+        android:layout_height="83dp"
+        android:layout_alignParentBottom="false"
+        android:layout_gravity="bottom"
+        android:layout_margin="8dp"
+        android:elevation="10dp"
+        app:cardBackgroundColor="@color/cardview_light_background"
         app:cardCornerRadius="4dp"
-        app:layout_anchorGravity="bottom"
-        app:layout_behavior="@string/bottom_sheet_behavior">
+        app:layout_anchor="@+id/container"
+        app:layout_anchorGravity="bottom|center">
 
         <fragment
             android:id="@+id/total_week_fragment"
@@ -67,51 +70,5 @@
             android:layout_height="wrap_content" />
 
     </android.support.v7.widget.CardView>
-
-    <!--<android.support.design.widget.FloatingActionButton
-        android:id="@+id/floatingActionButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:focusable="true"
-        app:elevation="10dp"
-        app:layout_anchor="@+id/bottomSheetLayout"
-        app:layout_anchorGravity="center"
-        app:srcCompat="@drawable/ic_relative_duration" />-->
-
-    <!--    <io.ghyeok.stickyswitch.widget.StickySwitch
-            android:id="@+id/absolute_relative_switch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_anchor="@+id/bottomSheetLayout"
-            app:layout_anchorGravity="left|bottom"
-            app:ss_animationDuration="300"
-            app:ss_iconPadding="14dp"
-            app:ss_iconSize="18dp"
-            app:ss_leftIcon="@drawable/ic_absolute_duration"
-            app:ss_leftText="Absolute"
-            app:ss_rightIcon="@drawable/ic_relative_duration"
-            app:ss_rightText="Relative"
-            app:ss_selectedTextSize="12sp"
-            app:ss_sliderBackgroundColor="@android:color/secondary_text_light"
-            app:ss_switchColor="@color/colorAccent"
-            app:ss_textColor="@android:color/secondary_text_light"
-            app:ss_textSize="12sp"
-            app:ss_animationType="curved"/> -->
-
-    <!--    <me.rishabhkhanna.customtogglebutton.CustomToggleButton
-            android:id="@+id/absolute_relative_switch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="25dp"
-            app:layout_anchor="@+id/bottomSheetLayout"
-            app:layout_anchorGravity="left|center"
-            app:checkedColor="@color/colorAccent"
-            app:uncheckedColor="@android:color/secondary_text_light"
-            app:checkedTextColor="@android:color/white"
-            app:uncheckedTextColor="@android:color/secondary_text_light"
-            app:radius="2dp"
-            android:textOn="Relative"
-            android:textOff="Absolute" /> -->
 
 </android.support.design.widget.CoordinatorLayout>

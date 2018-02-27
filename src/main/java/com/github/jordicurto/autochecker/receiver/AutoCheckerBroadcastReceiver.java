@@ -52,6 +52,7 @@ public class AutoCheckerBroadcastReceiver extends BroadcastReceiver {
                 case AutoCheckerConstants.INTENT_PERMISSION_GRANTED:
                 case AutoCheckerConstants.INTENT_REQUEST_CHECK_LOCATION:
                 case LocationManager.PROVIDERS_CHANGED_ACTION:
+                case Intent.ACTION_MY_PACKAGE_REPLACED:
 
                     AutoCheckerLocationSettingsClient.getInstance(context).checkLocationSettings();
 
