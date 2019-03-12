@@ -1,12 +1,12 @@
 package com.github.jordicurto.autochecker.manager;
 
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
 import com.github.jordicurto.autochecker.constants.AutoCheckerConstants;
 import com.github.jordicurto.autochecker.data.model.WatchedLocation;
+import com.github.jordicurto.autochecker.receiver.AutoCheckerBroadcastReceiver;
 import com.github.jordicurto.autochecker.util.ContextKeeper;
 
 import org.joda.time.LocalDateTime;
@@ -21,15 +21,17 @@ public class AutoCheckerTransitionManager extends ContextKeeper {
     public static final int ENTER_TRANSITION = 0;
     public static final int LEAVE_TRANSITION = 1;
 
-    private static AutoCheckerTransitionManager mInstance;
+    private AutoCheckerAlarmsManager mAutoCheckerAlarmsManager;
 
-    private AutoCheckerTransitionManager(Context context) {
+    public AutoCheckerTransitionManager(Context context) {
         super(context);
+        mAutoCheckerAlarmsManager = new AutoCheckerAlarmsManager(context);
     }
 
     private Intent createIntent(WatchedLocation location, long time, int direction) {
 
-        Intent intent = new Intent(AutoCheckerConstants.GEOFENCE_TRANSITION_CONFIRM_RECEIVED);
+        Intent intent = AutoCheckerBroadcastReceiver.createBroadcastIntent(getContext(),
+                AutoCheckerConstants.GEOFENCE_TRANSITION_CONFIRM_RECEIVED);
         intent.putExtra(AutoCheckerConstants.LOCATION_ID, location.getId());
         intent.putExtra(AutoCheckerConstants.TRANSITION_TIME, time);
         intent.putExtra(AutoCheckerConstants.TRANSITION_DIRECTION, direction);
@@ -39,17 +41,14 @@ public class AutoCheckerTransitionManager extends ContextKeeper {
 
     public void scheduleRegisterTransition(WatchedLocation location, long time, int direction, long delay) {
 
-        AutoCheckerAlarmsManager.getManager(getContext()).setAlarm(delay,
-                PendingIntent.getBroadcast(getContext(), 0, createIntent(location, time, direction),
-                        PendingIntent.FLAG_UPDATE_CURRENT));
+        mAutoCheckerAlarmsManager.setAlarm(delay, createIntent(location, time, direction));
     }
 
     public void cancelScheduledRegisterTransition() {
 
-        AutoCheckerAlarmsManager.getManager(getContext()).cancelAlarm(
-                PendingIntent.getBroadcast(getContext(), 0,
-                        new Intent(AutoCheckerConstants.GEOFENCE_TRANSITION_CONFIRM_RECEIVED),
-                        PendingIntent.FLAG_UPDATE_CURRENT));
+        Intent intent = AutoCheckerBroadcastReceiver.createBroadcastIntent(getContext(),
+                AutoCheckerConstants.GEOFENCE_TRANSITION_CONFIRM_RECEIVED);
+        mAutoCheckerAlarmsManager.cancelAlarm(intent);
     }
 
     public void registerTransition(WatchedLocation location, long time, int direction) {
@@ -68,6 +67,7 @@ public class AutoCheckerTransitionManager extends ContextKeeper {
         // Notify activities
         Intent intentAct = new Intent(AutoCheckerConstants.INTENT_ACTIVITY_RELOAD_REQUEST);
         intentAct.putExtra(AutoCheckerConstants.LOCATION_ID, location.getId());
+        //LocalBroadcastManager.getInstance(getContext()).
         getContext().sendBroadcast(intentAct);
     }
 
@@ -91,11 +91,5 @@ public class AutoCheckerTransitionManager extends ContextKeeper {
             AutoCheckerBusinessManager.getManager(getContext()).updateCheckOutRecord(location,
                     new LocalDateTime(time), false);
         }
-    }
-
-    public static AutoCheckerTransitionManager getInstance(Context context) {
-        if (mInstance == null)
-            mInstance = new AutoCheckerTransitionManager(context);
-        return mInstance;
     }
 }

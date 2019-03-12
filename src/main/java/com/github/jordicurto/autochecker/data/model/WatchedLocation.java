@@ -11,7 +11,8 @@ public class WatchedLocation implements Serializable {
 	
 	public static final int OUTSIDE_LOCATION = 0;
 	public static final int INSIDE_LOCATION = 1;
-	
+	public static final int FORCED_OUTSIDE_LOCATION = 2;
+
 	private int id;
 	private String name;
 	private double longitude;
@@ -86,4 +87,7 @@ public class WatchedLocation implements Serializable {
 		return status == INSIDE_LOCATION;
 	}
 
+	public boolean isForcedOutside() {
+		return status == FORCED_OUTSIDE_LOCATION;
+	}
 }

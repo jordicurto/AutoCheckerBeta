@@ -25,9 +25,7 @@ public class AutoCheckerNotificationManager extends ContextKeeper {
 
     private NotificationManager nManager;
 
-    private static AutoCheckerNotificationManager mInstance;
-
-    private AutoCheckerNotificationManager(Context context) {
+    public AutoCheckerNotificationManager(Context context) {
         super(context);
         nManager = (NotificationManager) getContext()
                 .getSystemService(Context.NOTIFICATION_SERVICE);
@@ -133,9 +131,4 @@ public class AutoCheckerNotificationManager extends ContextKeeper {
         nManager.cancel(id);
     }
 
-    public static AutoCheckerNotificationManager getInstance(Context context) {
-        if (mInstance == null)
-            mInstance = new AutoCheckerNotificationManager(context);
-        return mInstance;
-    }
 }

@@ -26,7 +26,7 @@ public class AutoCheckerBusinessManager {
 
     private final String TAG = getClass().getSimpleName();
 
-    private AutoCheckerDataSource dataSource = null;
+    private AutoCheckerDataSource dataSource;
 
     private static AutoCheckerBusinessManager instance = null;
 
@@ -117,6 +117,7 @@ public class AutoCheckerBusinessManager {
             switch (location.getStatus()) {
 
                 case WatchedLocation.OUTSIDE_LOCATION:
+                case WatchedLocation.FORCED_OUTSIDE_LOCATION:
 
                     location.setStatus(WatchedLocation.INSIDE_LOCATION);
                     dataSource.updateWatchedLocation(location);
@@ -166,7 +167,8 @@ public class AutoCheckerBusinessManager {
 
                 case WatchedLocation.INSIDE_LOCATION:
 
-                    location.setStatus(WatchedLocation.OUTSIDE_LOCATION);
+                    location.setStatus(forced ? WatchedLocation.FORCED_OUTSIDE_LOCATION :
+                            WatchedLocation.OUTSIDE_LOCATION);
                     dataSource.updateWatchedLocation(location);
 
                     record = dataSource.getUnCheckedWatchedLocationRecord(location);
@@ -183,6 +185,15 @@ public class AutoCheckerBusinessManager {
                         Log.e(TAG, "Trying to update record with check out before check in. Record deleted");
                         dataSource.removeRecord(record);
                     }
+
+                    break;
+
+                case WatchedLocation.FORCED_OUTSIDE_LOCATION:
+
+                    location.setStatus(WatchedLocation.OUTSIDE_LOCATION);
+                    dataSource.updateWatchedLocation(location);
+
+                    Log.i(TAG, "User has left " + location.getName());
 
                     break;
 
@@ -281,15 +292,34 @@ public class AutoCheckerBusinessManager {
         return records;
     }
 
-    public void forceLeaveCurrentLocations(LocalDateTime checkOut) {
+    public void leaveCurrentLocations(LocalDateTime checkOut, boolean forced) {
 
         try {
 
             dataSource.open();
             List<WatchedLocation> locations = dataSource.getAllWatchedLocations();
             for (WatchedLocation location : locations) {
-                if (location.isInside())
-                    updateCheckOutRecord(location, checkOut, true);
+                if (location.isInside() || location.isForcedOutside())
+                    updateCheckOutRecord(location, checkOut, forced);
+            }
+            dataSource.close();
+
+        } catch (SQLException e) {
+            Log.e(TAG, "DataSource exception", e);
+        } finally {
+            dataSource.close();
+        }
+    }
+
+    public void unForceLeaveLocations(LocalDateTime checkIn) {
+
+        try {
+
+            dataSource.open();
+            List<WatchedLocation> locations = dataSource.getAllWatchedLocations();
+            for (WatchedLocation location : locations) {
+                if (location.isForcedOutside())
+                    createCheckInRecord(location, checkIn, true);
             }
             dataSource.close();
 

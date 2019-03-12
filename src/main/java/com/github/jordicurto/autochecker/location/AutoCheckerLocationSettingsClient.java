@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.github.jordicurto.autochecker.constants.AutoCheckerConstants;
 import com.github.jordicurto.autochecker.manager.AutoCheckerNotificationManager;
+import com.github.jordicurto.autochecker.receiver.AutoCheckerBroadcastReceiver;
 import com.github.jordicurto.autochecker.util.ContextKeeper;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.CommonStatusCodes;
@@ -25,17 +26,18 @@ import com.google.android.gms.tasks.Task;
 
 public class AutoCheckerLocationSettingsClient extends ContextKeeper {
 
-    public final String TAG = getClass().getSimpleName();
+    private final String TAG = getClass().getSimpleName();
 
     private final SettingsClient mSettingsClient;
 
     private final LocationRequest mLocationRequest = new LocationRequest();
 
-    private static AutoCheckerLocationSettingsClient mInstance;
+    private AutoCheckerNotificationManager mAutoCheckerNotificationManager;
 
-    private AutoCheckerLocationSettingsClient(Context context) {
+    public AutoCheckerLocationSettingsClient(Context context) {
         super(context);
         mSettingsClient = LocationServices.getSettingsClient(context);
+        mAutoCheckerNotificationManager = new AutoCheckerNotificationManager(context);
     }
 
     public void checkLocationSettings() {
@@ -53,9 +55,11 @@ public class AutoCheckerLocationSettingsClient extends ContextKeeper {
             @Override
             public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
                 Log.i(TAG, "Location settings are OK");
-                getContext().sendBroadcast(
-                        new Intent(AutoCheckerConstants.INTENT_REQUEST_REGISTER_GEOFENCES));
-                AutoCheckerNotificationManager.getInstance(getContext()).cancelNotification(
+                Intent intent = AutoCheckerBroadcastReceiver.createBroadcastIntent(getContext(),
+                        AutoCheckerConstants.INTENT_REQUEST_REGISTER_GEOFENCES);
+                //LocalBroadcastManager.getInstance(getContext()).
+                getContext().sendBroadcast(intent);
+                mAutoCheckerNotificationManager.cancelNotification(
                         AutoCheckerConstants.NOTIFICATION_ENABLE_LOCATION);
             }
         });
@@ -66,16 +70,9 @@ public class AutoCheckerLocationSettingsClient extends ContextKeeper {
                 Log.w(TAG, "Location settings are not OK");
                 int statusCode = ((ApiException) e).getStatusCode();
                 if (statusCode == CommonStatusCodes.RESOLUTION_REQUIRED) {
-                    AutoCheckerNotificationManager.getInstance(getContext()).
-                            notifyEnableLocationRequired();
+                    mAutoCheckerNotificationManager.notifyEnableLocationRequired();
                 }
             }
         });
-    }
-
-    public static AutoCheckerLocationSettingsClient getInstance(Context context) {
-        if (mInstance == null)
-            mInstance = new AutoCheckerLocationSettingsClient(context);
-        return mInstance;
     }
 }

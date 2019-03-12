@@ -66,5 +66,6 @@
     <string name="pref_title_expected_duration_per_day">Temps diari dins l\'ubicació</string>
     <string name="pref_summary_expected_duration_per_week">El temps esperat dins l\'ubicació per setmana és ${h:mm}</string>
     <string name="pref_title_expected_duration_per_week">Temps setmanal dins l\'ubicació</string>
+    <string name="set">Set</string>
 
 </resources>

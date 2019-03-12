@@ -3,6 +3,7 @@ package com.github.jordicurto.autochecker.activity;
 import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -11,6 +12,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -22,12 +24,12 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import com.github.jordicurto.autochecker.R;
 import com.github.jordicurto.autochecker.constants.AutoCheckerConstants;
@@ -37,10 +39,12 @@ import com.github.jordicurto.autochecker.fragment.AutoCheckerWeekRecordsFragment
 import com.github.jordicurto.autochecker.manager.AutoCheckerBusinessManager;
 import com.github.jordicurto.autochecker.manager.AutoCheckerNotificationManager;
 import com.github.jordicurto.autochecker.manager.AutoCheckerPreferencesManager;
+import com.github.jordicurto.autochecker.receiver.AutoCheckerBroadcastReceiver;
 import com.github.jordicurto.autochecker.util.DateUtils;
 import com.polyak.iconswitch.IconSwitch;
 
 import org.joda.time.DateTime;
+import org.joda.time.Duration;
 import org.joda.time.Interval;
 
 import java.util.ArrayList;
@@ -72,6 +76,7 @@ public class AutoCheckerMainActivity extends AppCompatActivity implements
     private ViewPager mViewPager;
     private TabLayout mTabLayout;
     private IconSwitch mIconSwitch;
+    private IconSwitch mForceLeaveSwitch;
 
     private WatchedLocation location;
 
@@ -90,21 +95,24 @@ public class AutoCheckerMainActivity extends AppCompatActivity implements
 
             if (intent.getAction() != null &&
                     intent.getAction().equals(AutoCheckerConstants.INTENT_ACTIVITY_RELOAD_REQUEST)) {
-                invalidateOptionsMenu();
-                mViewPager.getAdapter().notifyDataSetChanged();
+                refreshUi();
             }
         }
     }
 
     private AutoCheckerActivityBroadcastReceiver mBroadcastReceiver;
 
+    private AutoCheckerNotificationManager mAutoCheckerNotificationManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mAutoCheckerNotificationManager = new AutoCheckerNotificationManager(this);
+
         setContentView(R.layout.autochecker_main);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
@@ -115,10 +123,10 @@ public class AutoCheckerMainActivity extends AppCompatActivity implements
                 getSupportFragmentManager().findFragmentById(R.id.total_week_fragment);
 
         // Set up the ViewPager with the sections adapter.
-        mViewPager = (ViewPager) findViewById(R.id.container);
+        mViewPager = findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
-        mTabLayout = (TabLayout) findViewById(R.id.tabs);
+        mTabLayout = findViewById(R.id.tabs);
         mTabLayout.setupWithViewPager(mViewPager);
         mTabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -137,7 +145,7 @@ public class AutoCheckerMainActivity extends AppCompatActivity implements
             }
         });
 
-        mIconSwitch = (IconSwitch) findViewById(R.id.absolute_relative_switch);
+        mIconSwitch = findViewById(R.id.absolute_relative_switch);
         mIconSwitch.setCheckedChangeListener(new IconSwitch.CheckedChangeListener() {
             @Override
             public void onCheckChanged(IconSwitch.Checked current) {
@@ -145,14 +153,28 @@ public class AutoCheckerMainActivity extends AppCompatActivity implements
             }
         });
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mForceLeaveSwitch = findViewById(R.id.force_leave_switch);
+        mForceLeaveSwitch.setCheckedChangeListener(new IconSwitch.CheckedChangeListener() {
+            @Override
+            public void onCheckChanged(IconSwitch.Checked current) {
+                if (location != null) {
+                    if (location.isInside() && current == IconSwitch.Checked.RIGHT) {
+                        confirmLeaveRequest();
+                    } else if (location.isForcedOutside() && current == IconSwitch.Checked.LEFT) {
+                        confirmCancelLeaveRequest();
+                    }
+                }
+            }
+        });
+
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open,
                 R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         checkPermissions();
@@ -207,7 +229,7 @@ public class AutoCheckerMainActivity extends AppCompatActivity implements
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -222,7 +244,8 @@ public class AutoCheckerMainActivity extends AppCompatActivity implements
                 selectedTab = mCurrentSelectedTab;
             else
                 selectedTab = mTabLayout.getTabCount() - 1;
-            mTabLayout.getTabAt(selectedTab).select();
+            if (mTabLayout.getTabAt(selectedTab) != null)
+                mTabLayout.getTabAt(selectedTab).select();
         }
     }
 
@@ -253,12 +276,10 @@ public class AutoCheckerMainActivity extends AppCompatActivity implements
             intervalTabDates = intervals;
         }
 
-        invalidateOptionsMenu();
-
         mIconSwitch.setChecked(preferencesManager.isRelativeDurations() ?
                 IconSwitch.Checked.RIGHT : IconSwitch.Checked.LEFT);
 
-        mViewPager.getAdapter().notifyDataSetChanged();
+        refreshUi();
     }
 
     private void checkFirstRun() {
@@ -292,17 +313,20 @@ public class AutoCheckerMainActivity extends AppCompatActivity implements
                                            @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if(grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            AutoCheckerNotificationManager.getInstance(this).cancelNotification(
+            mAutoCheckerNotificationManager.cancelNotification(
                     AutoCheckerConstants.NOTIFICATION_PERMISSION_REQUIRED);
             checkLocationSettings();
         } else {
-            AutoCheckerNotificationManager.getInstance(this).notifyPermissionRequired(
+            mAutoCheckerNotificationManager.notifyPermissionRequired(
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
         }
     }
 
     private void checkLocationSettings() {
-        sendBroadcast(new Intent(AutoCheckerConstants.INTENT_REQUEST_CHECK_LOCATION));
+        Intent intent = AutoCheckerBroadcastReceiver.createBroadcastIntent(
+                this, AutoCheckerConstants.INTENT_REQUEST_CHECK_LOCATION);
+        //LocalBroadcastManager.getInstance(this).
+        sendBroadcast(intent);
     }
 
     @Override
@@ -318,7 +342,7 @@ public class AutoCheckerMainActivity extends AppCompatActivity implements
         MenuItem insideLocationIndicator = menu.findItem(R.id.inside_location_action);
 
         if (location != null) {
-            if (location.isInside())
+            if (location.isInside() || location.isForcedOutside())
                 insideLocationIndicator.setIcon(R.drawable.ic_inside_indicator_action);
             else
                 insideLocationIndicator.setIcon(R.drawable.ic_outside_indicator_action);
@@ -342,13 +366,74 @@ public class AutoCheckerMainActivity extends AppCompatActivity implements
         }
 
         if (id == R.id.inside_location_action) {
-            Toast.makeText(this, getString(location.isInside() ?
-                    R.string.inside_location_text : R.string.outside_location_text,
-                    location.getName()), Toast.LENGTH_SHORT).show();
+
+            Snackbar.make(findViewById(R.id.container), getString(location.isInside() ?
+                            R.string.inside_location_text : R.string.outside_location_text,
+                    location.getName()), Snackbar.LENGTH_LONG).show();
+
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void confirmCancelLeaveRequest() {
+        Intent intent = AutoCheckerBroadcastReceiver.createBroadcastIntent(
+                this, AutoCheckerConstants.INTENT_CANCEL_LEAVE_LOCATION);
+        //LocalBroadcastManager.getInstance(this).
+        sendBroadcast(intent);
+    }
+
+    private void confirmLeaveRequest() {
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle(R.string.leave_dialog_title_text)
+                .setSingleChoiceItems(R.array.timing_items, 0, null)
+                .setCancelable(false)
+                .setPositiveButton(R.string.confirm_force_leave_loaction_text, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Duration selectedDuration = null;
+                        dialog.dismiss();
+                        switch (((AlertDialog) dialog).getListView().getCheckedItemPosition()) {
+                            case 0:
+                                selectedDuration = Duration.millis(15 * DateUtils.MINS_PER_MILLISECOND);
+                                break;
+                            case 1:
+                                selectedDuration = Duration.millis(30 * DateUtils.MINS_PER_MILLISECOND);
+                                break;
+                            case 2:
+                                selectedDuration = Duration.millis(DateUtils.HOURS_PER_MILLISECOND);
+                                break;
+                            case 3:
+                                selectedDuration = Duration.millis(4 * DateUtils.HOURS_PER_MILLISECOND);
+                                break;
+                            case 4:
+                                preferencesManager.updatePreferences(AutoCheckerMainActivity.this);
+                                selectedDuration = DateUtils.getDurationUntilDayChange(preferencesManager.getStartDayHour());
+                                break;
+                        }
+
+                        if (selectedDuration != null)
+                            sendForceLeaveRequest(selectedDuration);
+                    }
+                }).setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        refreshUi();
+                    }
+                }).create();
+
+        dialog.show();
+    }
+
+    private void sendForceLeaveRequest(Duration selectedDuration) {
+        Intent intent = AutoCheckerBroadcastReceiver.createBroadcastIntent(
+                this, AutoCheckerConstants.INTENT_FORCE_LEAVE_LOCATION);
+        intent.putExtra(AutoCheckerConstants.INTENT_FORCE_LEAVE_LOCATION_EXTRA_DURATION,
+                selectedDuration.getMillis());
+        //LocalBroadcastManager.getInstance(this)
+        sendBroadcast(intent);
     }
 
     @Override
@@ -371,7 +456,16 @@ public class AutoCheckerMainActivity extends AppCompatActivity implements
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         prefs.edit().
                 putBoolean(AutoCheckerConstants.PREF_SHOW_RELATIVE_DURATIONS, relative).apply();
-        mViewPager.getAdapter().notifyDataSetChanged();
+        refreshUi();
+    }
+
+    private void refreshUi() {
+        supportInvalidateOptionsMenu();
+        if (mViewPager.getAdapter() != null)
+            mViewPager.getAdapter().notifyDataSetChanged();
+        mForceLeaveSwitch.setEnabled(location.isInside() || location.isForcedOutside());
+        mForceLeaveSwitch.setChecked(location.isForcedOutside() ?
+                IconSwitch.Checked.RIGHT : IconSwitch.Checked.LEFT);
     }
 
     /**
@@ -396,7 +490,7 @@ public class AutoCheckerMainActivity extends AppCompatActivity implements
         }
 
         @Override
-        public int getItemPosition(Object object) {
+        public int getItemPosition(@NonNull Object object) {
             return POSITION_NONE;
         }
 

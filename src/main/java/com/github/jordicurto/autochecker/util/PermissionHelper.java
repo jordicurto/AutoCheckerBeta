@@ -2,15 +2,10 @@
 package com.github.jordicurto.autochecker.util;
 
 import android.app.Activity;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.TaskStackBuilder;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.os.ResultReceiver;
 import android.support.v7.app.AppCompatActivity;
 
@@ -31,6 +26,14 @@ public class PermissionHelper {
         String[] permissions;
         int requestCode;
 
+        private AutoCheckerNotificationManager mAutoCheckerNotificationManager;
+
+        @Override
+        public void onCreate(@Nullable Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            mAutoCheckerNotificationManager = new AutoCheckerNotificationManager(this);
+        }
+
         /**
          * Called when the user has made a choice in the permission dialog.
          * <p>
@@ -43,10 +46,12 @@ public class PermissionHelper {
             Bundle resultData = new Bundle();
             resultData.putStringArray(AutoCheckerConstants.KEY_PERMISSIONS, permissions);
             resultData.putIntArray(AutoCheckerConstants.KEY_GRANT_RESULTS, grantResults);
-            Intent intent = new Intent(AutoCheckerConstants.INTENT_PERMISSION_GRANTED);
+            Intent intent = AutoCheckerBroadcastReceiver.createBroadcastIntent(
+                    this, AutoCheckerConstants.INTENT_PERMISSION_GRANTED);
             intent.putExtras(resultData);
+            //LocalBroadcastManager.getInstance(this).
             sendBroadcast(intent);
-            AutoCheckerNotificationManager.getInstance(this).cancelNotification(
+            mAutoCheckerNotificationManager.cancelNotification(
                     AutoCheckerConstants.NOTIFICATION_PERMISSION_REQUIRED);
             finish();
         }

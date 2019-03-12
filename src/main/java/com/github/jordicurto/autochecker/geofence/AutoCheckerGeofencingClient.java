@@ -12,6 +12,7 @@ import android.util.Log;
 import com.github.jordicurto.autochecker.constants.AutoCheckerConstants;
 import com.github.jordicurto.autochecker.data.model.WatchedLocation;
 import com.github.jordicurto.autochecker.manager.AutoCheckerNotificationManager;
+import com.github.jordicurto.autochecker.receiver.AutoCheckerBroadcastReceiver;
 import com.github.jordicurto.autochecker.util.ContextKeeper;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.location.Geofence;
@@ -34,17 +35,18 @@ public class AutoCheckerGeofencingClient extends ContextKeeper {
 
     private static final String AUTOCHECKER_GEOFENCE_REQ_ID = "AUTOCHECKER_GEOFENCE_";
 
-    public final String TAG = getClass().getSimpleName();
+    private final String TAG = getClass().getSimpleName();
 
     private GeofencingClient mGeofencingClient = null;
     private PendingIntent mGeofencePendingIntent = null;
     private List<Geofence> geofencesToAdd = new ArrayList<>();
 
-    private static AutoCheckerGeofencingClient mInstance;
+    private AutoCheckerNotificationManager mAutoCheckerNotificationManager;
 
-    private AutoCheckerGeofencingClient(Context context) {
+    public AutoCheckerGeofencingClient(Context context) {
         super(context);
-        mGeofencingClient = LocationServices.getGeofencingClient(getContext());
+        mGeofencingClient = LocationServices.getGeofencingClient(context);
+        mAutoCheckerNotificationManager = new AutoCheckerNotificationManager(context);
     }
 
     @NonNull
@@ -62,8 +64,9 @@ public class AutoCheckerGeofencingClient extends ContextKeeper {
         if (mGeofencePendingIntent != null) {
             return mGeofencePendingIntent;
         } else {
-            return PendingIntent.getBroadcast(getContext(), 0,
-                    new Intent(AutoCheckerConstants.GEOFENCE_TRANSITION_RECEIVED),
+            Intent intent = AutoCheckerBroadcastReceiver.createBroadcastIntent(getContext(),
+                    AutoCheckerConstants.GEOFENCE_TRANSITION_RECEIVED);
+            return PendingIntent.getBroadcast(getContext(), 0, intent,
                     PendingIntent.FLAG_UPDATE_CURRENT);
         }
     }
@@ -92,7 +95,7 @@ public class AutoCheckerGeofencingClient extends ContextKeeper {
             task.addOnSuccessListener(new OnSuccessListener<Void>() {
                 @Override
                 public void onSuccess(Void aVoid) {
-                    AutoCheckerNotificationManager.getInstance(getContext()).notifyRegisteredGeofence();
+                    mAutoCheckerNotificationManager.notifyRegisteredGeofence();
                     Log.i(TAG, "Registering successful");
                 }
             });
@@ -105,8 +108,7 @@ public class AutoCheckerGeofencingClient extends ContextKeeper {
                     Log.e(TAG, "Registering failed: " + getErrorString(errorCode));
 
                     if (errorCode == GeofenceStatusCodes.GEOFENCE_NOT_AVAILABLE) {
-                        AutoCheckerNotificationManager.getInstance(getContext()).
-                                notifyEnableLocationRequired();
+                        mAutoCheckerNotificationManager.notifyEnableLocationRequired();
                     }
                 }
             });
@@ -140,12 +142,6 @@ public class AutoCheckerGeofencingClient extends ContextKeeper {
             default:
                 return "Unknown error code: " + errorCode;
         }
-    }
-
-    public static AutoCheckerGeofencingClient getInstance(Context context) {
-        if (mInstance == null)
-            mInstance = new AutoCheckerGeofencingClient(context);
-        return mInstance;
     }
 
 }

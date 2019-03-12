@@ -23,6 +23,19 @@
             android:background="?attr/colorPrimary"
             app:popupTheme="@style/AppTheme.PopupOverlay">
 
+            <com.polyak.iconswitch.IconSwitch
+                android:id="@+id/force_leave_switch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end|center_vertical"
+                android:elevation="5dp"
+                app:isw_default_selection="left"
+                app:isw_icon_left="@drawable/ic_inside_indicator_action"
+                app:isw_icon_right="@drawable/ic_force_out"
+                app:isw_thumb_color_left="@color/colorDisabled"
+                app:isw_thumb_color_right="@color/colorAccent"
+                app:isw_icon_size="24dp" />
+
         </android.support.v7.widget.Toolbar>
 
         <android.support.design.widget.TabLayout
@@ -42,14 +55,6 @@
         android:layout_marginBottom="92dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
-    <!--
-        <View
-            android:id="@+id/actionDivider"
-            android:layout_width="fill_parent"
-            android:layout_height="1dip"
-            android:layout_below="@id/container"
-            android:background="#d2d2d2" />-->
-
     <android.support.v7.widget.CardView
         android:id="@+id/bottomSheetLayout"
         android:layout_width="match_parent"
@@ -59,9 +64,10 @@
         android:layout_margin="8dp"
         android:elevation="10dp"
         app:cardBackgroundColor="@color/cardview_light_background"
-        app:cardCornerRadius="4dp"
+        app:cardCornerRadius="6dp"
         app:layout_anchor="@+id/container"
-        app:layout_anchorGravity="bottom|center">
+        app:layout_anchorGravity="bottom|center"
+        app:layout_behavior="com.github.jordicurto.autochecker.util.CardViewCustomBehaviour">
 
         <fragment
             android:id="@+id/total_week_fragment"

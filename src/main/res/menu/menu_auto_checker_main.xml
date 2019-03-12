@@ -5,13 +5,14 @@
     <item
         android:id="@+id/inside_location_action"
         android:title=""
-        app:showAsAction="always"
+        app:showAsAction="ifRoom"
         android:icon="@drawable/ic_outside_indicator_action"
         android:enabled="true"
         android:checkable="true" />
     <item
         android:id="@+id/action_settings"
+        android:icon="@drawable/ic_settings_action"
         android:orderInCategory="102"
         android:title="@string/action_settings"
-        app:showAsAction="never" />
+        app:showAsAction="ifRoom" />
 </menu>

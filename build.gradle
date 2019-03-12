@@ -4,18 +4,18 @@ android {
     signingConfigs {
         androidKey {
             keyAlias 'AndroidKey'
-            keyPassword 'curtom253085'
+            keyPassword 'd7?wpBQsbQ2#ujE3'
             storeFile file('/home/jordi/devel/keystores/android.jks')
             storePassword 'indepe'
         }
     }
-    compileSdkVersion 25
+    compileSdkVersion 28
     defaultConfig {
         applicationId "com.github.jordicurto.autochecker"
         minSdkVersion 21
-        targetSdkVersion 25
-        versionCode 4
-        versionName "1.2.1-GTD"
+        targetSdkVersion 28
+        versionCode 5
+        versionName "1.3-GTD"
         vectorDrawables.useSupportLibrary = true
         signingConfig signingConfigs.androidKey
     }
@@ -37,21 +37,21 @@ repositories {
 
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.android.support:appcompat-v7:25.4.0'
-    compile 'com.android.support:design:25.4.0'
-    compile 'com.android.support:recyclerview-v7:25.4.0'
-    implementation 'com.android.support:cardview-v7:25.4.0'
-    compile 'com.android.support:support-v4:25.4.0'
-    compile 'com.google.android.gms:play-services-location:11.6.0'
-    compile 'com.google.android.gms:play-services-maps:11.6.0'
-    compile 'com.github.PhilJay:MPAndroidChart:v3.0.2'
-    compile 'com.android.support.constraint:constraint-layout:1.1.0-beta3'
-    compile 'net.danlew:android.joda:2.9.5.1'
-    compile 'com.bignerdranch.android:expandablerecyclerview:3.0.0-RC1'
-    compile 'com.android.support:support-vector-drawable:25.4.0'
-    compile 'mobi.upod:time-duration-picker:1.1.3'
-    compile 'com.polyak:icon-switch:1.0.0'
-    compile 'me.rishabhkhanna:CustomToggle:1.0.0'
-    testCompile 'junit:junit:4.12'
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'com.android.support:appcompat-v7:28.0.0'
+    implementation 'com.android.support:design:28.0.0'
+    implementation 'com.android.support:recyclerview-v7:28.0.0'
+    implementation 'com.android.support:cardview-v7:28.0.0'
+    implementation 'com.android.support:support-v4:28.0.0'
+    implementation 'com.android.support:support-vector-drawable:28.0.0'
+    implementation 'com.google.android.gms:play-services-location:16.0.0'
+    implementation 'com.google.android.gms:play-services-maps:16.0.0'
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.0.2'
+    implementation 'com.android.support.constraint:constraint-layout:2.0.0-alpha2'
+    implementation 'net.danlew:android.joda:2.9.5.1'
+    implementation 'com.bignerdranch.android:expandablerecyclerview:3.0.0-RC1'
+    implementation 'mobi.upod:time-duration-picker:1.1.3'
+    implementation 'com.github.parminder93:IconSwitch:v1.0.5'
+    implementation 'me.rishabhkhanna:CustomToggle:1.0.0'
+    testImplementation 'junit:junit:4.12'
 }

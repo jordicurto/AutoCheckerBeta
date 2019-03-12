@@ -42,11 +42,15 @@ public class AutoCheckerConstants {
     public static final String ALARM_NOTIFICATION_DURATION = "ALARM_NOTIFICATION_DURATION";
     public static final String ALARM_HOUSEKEEPING = "ALARM_HOUSEKEEPING";
     public static final String ALARM_DAY_CHANGE = "ALARM_DAY_CHANGE";
+    public static final String ALARM_FORCE_LEAVE_LOCATION = "ALARM_FORCE_LEAVE_LOCATION";
 
     public final static String INTENT_REQUEST_REGISTER_GEOFENCES = "INTENT_REQUEST_REGISTER_GEOFENCES";
     public final static String INTENT_PERMISSION_GRANTED = "INTENT_PERMISSION_GRANTED";
     public final static String INTENT_REQUEST_CHECK_LOCATION = "INTENT_REQUEST_CHECK_LOCATION";
     public final static String INTENT_FORCE_LEAVE_LOCATION = "INTENT_FORCE_LEAVE_LOCATION";
+    public final static String INTENT_CANCEL_LEAVE_LOCATION = "INTENT_CANCEL_LEAVE_LOCATION";
+
+    public static final String INTENT_FORCE_LEAVE_LOCATION_EXTRA_DURATION = "DURATION_EXTRA";
 
     public static final String LOCATION_ID = "LOCATION_ID";
 	public static final String TRANSITION_TIME = "TRANSITION_TIME";
@@ -65,4 +69,5 @@ public class AutoCheckerConstants {
     public static final String KEY_GRANT_RESULTS = "KEY_GRANT_RESULTS";
     public static final String KEY_RESULT_RECEIVER = "KEY_RESULT_RECEIVER";
     public static final String KEY_REQUEST_CODE = "KEY_REQUEST_CODE";
+
 }

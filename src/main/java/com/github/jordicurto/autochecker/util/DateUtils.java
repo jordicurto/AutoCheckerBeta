@@ -3,9 +3,11 @@ package com.github.jordicurto.autochecker.util;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.support.annotation.NonNull;
 
 import com.github.jordicurto.autochecker.data.model.WatchedLocationRecord;
 
+import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.Duration;
 import org.joda.time.Interval;
@@ -204,6 +206,13 @@ public class DateUtils {
     public static long getMillisUtilDayChange(int startDayHourOffset) {
         return ((LocalDateTime.now().toDateTime().getMillis() % DateTimeConstants.MILLIS_PER_DAY) +
                 (startDayHourOffset * DateUtils.HOURS_PER_MILLISECOND));
+    }
+
+    @NonNull
+    public static Duration getDurationUntilDayChange(int startDayHourOffset) {
+        DateTime end = getCurrentDate().plusDays(1).withHourOfDay(startDayHourOffset)
+                .withMinuteOfHour(0).withSecondOfMinute(0).withMillisOfSecond(0).toDateTime();
+        return new Duration(getCurrentDate().toDateTime(), end);
     }
 
     public static long getApplicationInstallTime(Context context, String appName) {
