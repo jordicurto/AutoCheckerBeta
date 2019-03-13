@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="action_settings">Opciones</string>
     <string name="empty_locations_list">No se ha encontrado ninguna ubicación</string>
     <string name="inside_location">Dentro</string>
-    <string name="inside_location_text">Estás dentro de %1$s</string>
+    <string name="inside_location_text">Estás en %1$s</string>
     <string name="inside_outside_menu">Estás dentro?</string>
     <string name="location_list_title">Ubicaciones</string>
     <string name="location_name">Nombre</string>
@@ -25,7 +25,7 @@
     <string name="navigation_drawer_close">Cerrar listado de ubicaciones</string>
     <string name="not_enable_location_title">Activa la ubicación</string>
     <string name="not_enable_location_text">La applicacióm necesita acceso a los servicios de ubicación</string>
-    <plurals name="relative_week_text">
+    <plurals name="relative_week_text" tools:ignore="UnusedQuantity">
         <item quantity="zero">Esta semana</item>
         <item quantity="one">Hace una semana</item>
         <item quantity="other">Hace %s semanas</item>
@@ -41,7 +41,8 @@
     <string name="pref_title_expected_duration_per_day">Tiempo diario dentro de la ubicación</string>
     <string name="pref_summary_expected_duration_per_week">El tiempo esperado dentro de la ubicación por semana es ${h:mm}</string>
     <string name="pref_title_expected_duration_per_week">Tiempo semanal dentro de la ubicación</string>
-    <string name="set">Set</string>
+    <string name="set">Configura</string>
+    <string name="channel_name">Notifications</string>
     <string-array name="number_str_array">
         <item>cero</item>
         <item>una</item>
@@ -57,4 +58,9 @@
         <item>onze</item>
         <item>doce</item>
     </string-array>
+    <string name="confirm_force_leave_loaction_text">Detener</string>
+    <string name="leave_dialog_title_text">Detener registro de tiempo</string>
+    <string name="cancel">Cancelar</string>
+    <string name="active_recording_text">Registro de tiempo activo</string>
+    <string name="stopped_recording_text">Registro de tiempo detenido</string>
 </resources>

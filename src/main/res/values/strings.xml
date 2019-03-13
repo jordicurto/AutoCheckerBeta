@@ -10,7 +10,7 @@
     <string name="record_duration" translatable="false"> 00:00</string>
     <string name="total_duration">Total</string>
 
-    <string name="inside_location_text">You are inside %1$s</string>
+    <string name="inside_location_text">You are in %1$s</string>
     <string name="outside_location_text">You are outside %1$s</string>
 
     <string name="notification_title_enter">You entered %1$s</string>
@@ -50,8 +50,11 @@
     <string name="pref_title_expected_duration_per_week">Weekly time in location</string>
     <string name="set">Set</string>
     <string name="cancel">Cancel</string>
-    <string name="leave_dialog_title_text">Force leave location</string>
-    <string name="confirm_force_leave_loaction_text">Leave location</string>
+    <string name="leave_dialog_title_text">Stop recording time</string>
+    <string name="confirm_force_leave_loaction_text">Stop</string>
+    <string name="channel_name">Notifications</string>
+    <string name="active_recording_text">Time recording active</string>
+    <string name="stopped_recording_text">Time recording stopped</string>
 
     <plurals name="relative_week_text">
         <item quantity="zero">This week</item>

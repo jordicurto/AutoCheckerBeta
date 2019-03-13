@@ -1,11 +1,14 @@
 package com.github.jordicurto.autochecker.manager;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.provider.Settings;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 
 import com.github.jordicurto.autochecker.R;
@@ -24,11 +27,26 @@ import org.joda.time.LocalDateTime;
 public class AutoCheckerNotificationManager extends ContextKeeper {
 
     private NotificationManager nManager;
+    private String CHANNEL_ID = "AUTOCHECKER_NOTIFICATION_CHANNEL";
 
     public AutoCheckerNotificationManager(Context context) {
         super(context);
         nManager = (NotificationManager) getContext()
                 .getSystemService(Context.NOTIFICATION_SERVICE);
+        createNotificationChannel();
+    }
+
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = getContext().getString(R.string.channel_name);
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            nManager.createNotificationChannel(channel);
+        }
     }
 
     private Notification buildNotification(int smallIcon, String title, String text) {
@@ -48,7 +66,7 @@ public class AutoCheckerNotificationManager extends ContextKeeper {
                         PendingIntent.FLAG_UPDATE_CURRENT
                 );
 
-        return new Notification.Builder(getContext())
+        return new NotificationCompat.Builder(getContext(), CHANNEL_ID)
                 .setSmallIcon(smallIcon)
                 .setContentTitle(title)
                 .setContentText(text)

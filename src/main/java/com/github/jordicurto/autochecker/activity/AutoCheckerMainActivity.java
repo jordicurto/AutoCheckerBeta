@@ -49,6 +49,7 @@ import org.joda.time.Interval;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class AutoCheckerMainActivity extends AppCompatActivity implements
         ActivityCompat.OnRequestPermissionsResultCallback,
@@ -95,7 +96,8 @@ public class AutoCheckerMainActivity extends AppCompatActivity implements
 
             if (intent.getAction() != null &&
                     intent.getAction().equals(AutoCheckerConstants.INTENT_ACTIVITY_RELOAD_REQUEST)) {
-                refreshUi();
+                loadContents();
+                showSnackbar();
             }
         }
     }
@@ -244,8 +246,9 @@ public class AutoCheckerMainActivity extends AppCompatActivity implements
                 selectedTab = mCurrentSelectedTab;
             else
                 selectedTab = mTabLayout.getTabCount() - 1;
+
             if (mTabLayout.getTabAt(selectedTab) != null)
-                mTabLayout.getTabAt(selectedTab).select();
+                Objects.requireNonNull(mTabLayout.getTabAt(selectedTab)).select();
         }
     }
 
@@ -366,15 +369,23 @@ public class AutoCheckerMainActivity extends AppCompatActivity implements
         }
 
         if (id == R.id.inside_location_action) {
-
-            Snackbar.make(findViewById(R.id.container), getString(location.isInside() ?
-                            R.string.inside_location_text : R.string.outside_location_text,
-                    location.getName()), Snackbar.LENGTH_LONG).show();
-
+            showSnackbar();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showSnackbar() {
+
+        int inOutText = location.isInside() ? R.string.inside_location_text :
+                R.string.outside_location_text;
+
+        int recordStatus = location.isForcedOutside() ? R.string.stopped_recording_text :
+                R.string.active_recording_text;
+
+        Snackbar.make(findViewById(R.id.container), getString(inOutText, location.getName())
+                + " | " + getString(recordStatus), Snackbar.LENGTH_LONG).show();
     }
 
     private void confirmCancelLeaveRequest() {
@@ -405,22 +416,25 @@ public class AutoCheckerMainActivity extends AppCompatActivity implements
                                 selectedDuration = Duration.millis(DateUtils.HOURS_PER_MILLISECOND);
                                 break;
                             case 3:
-                                selectedDuration = Duration.millis(4 * DateUtils.HOURS_PER_MILLISECOND);
+                                selectedDuration = Duration.millis(2 * DateUtils.HOURS_PER_MILLISECOND);
                                 break;
                             case 4:
                                 preferencesManager.updatePreferences(AutoCheckerMainActivity.this);
-                                selectedDuration = DateUtils.getDurationUntilDayChange(preferencesManager.getStartDayHour());
+                                selectedDuration = DateUtils.getDurationUntilDayChange(
+                                        preferencesManager.getStartDayHour());
                                 break;
                         }
 
-                        if (selectedDuration != null)
+                        if (selectedDuration != null) {
                             sendForceLeaveRequest(selectedDuration);
+                        }
                     }
                 }).setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
                         refreshUi();
+                        showSnackbar();
                     }
                 }).create();
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <string name="action_settings">Opcions</string>
 
@@ -11,7 +11,7 @@
     <string name="empty_locations_list">No s\'ha trobat cap ubicació</string>
     <string name="total_duration">Total</string>
 
-    <string name="inside_location_text">Estàs dins de %1$s</string>
+    <string name="inside_location_text">Estàs a %1$s</string>
     <string name="outside_location_text">Estàs fora de %1$s</string>
 
     <string name="notification_title_enter">Has entrat a %1$s</string>
@@ -34,7 +34,7 @@
     <string name="not_enable_location_title">Activa l\'ubicació</string>
     <string name="not_enable_location_text">L\'applicació necessita accés als serveis d\'ubicació</string>
 
-    <plurals name="relative_week_text">
+    <plurals name="relative_week_text" tools:ignore="UnusedQuantity">
         <item quantity="zero">Aquesta setmana</item>
         <item quantity="one">Fa una setmana</item>
         <item quantity="other">Fa %s setmanes</item>
@@ -66,6 +66,12 @@
     <string name="pref_title_expected_duration_per_day">Temps diari dins l\'ubicació</string>
     <string name="pref_summary_expected_duration_per_week">El temps esperat dins l\'ubicació per setmana és ${h:mm}</string>
     <string name="pref_title_expected_duration_per_week">Temps setmanal dins l\'ubicació</string>
-    <string name="set">Set</string>
+    <string name="set">Configura</string>
+    <string name="channel_name">Notifications</string>
+    <string name="confirm_force_leave_loaction_text">Atura</string>
+    <string name="leave_dialog_title_text">Atura registre de temps</string>
+    <string name="cancel">Cancel·la</string>
+    <string name="active_recording_text">Registre de temps actiu</string>
+    <string name="stopped_recording_text">Registre de temps aturat</string>
 
 </resources>
