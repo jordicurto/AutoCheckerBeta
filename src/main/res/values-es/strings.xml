@@ -7,7 +7,7 @@
     <string name="inside_outside_menu">Estás dentro?</string>
     <string name="location_list_title">Ubicaciones</string>
     <string name="location_name">Nombre</string>
-    <string name="notification_register_geofence_text">La applicación ahora esta siguiendo tu ubicación</string>
+    <string name="notification_register_geofence_text">La aplicación ahora esta siguiendo tu ubicación</string>
     <string name="notification_register_geofence_title">%1$s se esta ejecutando</string>
     <string name="notification_text">Se ha registrado el evento a las %1$s</string>
     <string name="notification_title_enter">Has entrado a %1$s</string>
@@ -24,7 +24,7 @@
     <string name="navigation_drawer_open">Abrir listado de ubicaciones</string>
     <string name="navigation_drawer_close">Cerrar listado de ubicaciones</string>
     <string name="not_enable_location_title">Activa la ubicación</string>
-    <string name="not_enable_location_text">La applicacióm necesita acceso a los servicios de ubicación</string>
+    <string name="not_enable_location_text">La aplicación necesita acceso a los servicios de ubicación</string>
     <plurals name="relative_week_text" tools:ignore="UnusedQuantity">
         <item quantity="zero">Esta semana</item>
         <item quantity="one">Hace una semana</item>
@@ -36,7 +36,7 @@
     <string name="pref_summary_start_day_hour">Es la hora del día cuando empieza la mañana</string>
     <string name="pref_title_start_day_hour">Hora de inicio de la mañana</string>
     <string name="pref_summary_weeks_to_show">Es el número máximo de semanas visibles</string>
-    <string name="pref_title_weeks_to_show">Numero de semanas a mostrar</string>
+    <string name="pref_title_weeks_to_show">Número de semanas a mostrar</string>
     <string name="pref_summary_expected_duration_per_day">El tiempo esperado dentro de la ubicación por día es ${h:mm}</string>
     <string name="pref_title_expected_duration_per_day">Tiempo diario dentro de la ubicación</string>
     <string name="pref_summary_expected_duration_per_week">El tiempo esperado dentro de la ubicación por semana es ${h:mm}</string>

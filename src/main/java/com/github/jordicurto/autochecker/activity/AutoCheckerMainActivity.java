@@ -378,14 +378,14 @@ public class AutoCheckerMainActivity extends AppCompatActivity implements
 
     private void showSnackbar() {
 
-        int inOutText = location.isInside() ? R.string.inside_location_text :
-                R.string.outside_location_text;
+        String snackText = getString(location.isInside() ? R.string.inside_location_text :
+                R.string.outside_location_text, location.getName());
 
-        int recordStatus = location.isForcedOutside() ? R.string.stopped_recording_text :
-                R.string.active_recording_text;
+        if (location.isInside() || location.isForcedOutside())
+            snackText += " | " + getString(location.isForcedOutside() ?
+                    R.string.stopped_recording_text : R.string.active_recording_text);
 
-        Snackbar.make(findViewById(R.id.container), getString(inOutText, location.getName())
-                + " | " + getString(recordStatus), Snackbar.LENGTH_LONG).show();
+        Snackbar.make(findViewById(R.id.container), snackText, Snackbar.LENGTH_LONG).show();
     }
 
     private void confirmCancelLeaveRequest() {

@@ -32,7 +32,7 @@
     <string name="navigation_drawer_open">Obrir llistat d\'ubicacions</string>
     <string name="navigation_drawer_close">Tancar llistat d\'ubacions</string>
     <string name="not_enable_location_title">Activa l\'ubicació</string>
-    <string name="not_enable_location_text">L\'applicació necessita accés als serveis d\'ubicació</string>
+    <string name="not_enable_location_text">L\'aplicació necessita accés als serveis d\'ubicació</string>
 
     <plurals name="relative_week_text" tools:ignore="UnusedQuantity">
         <item quantity="zero">Aquesta setmana</item>
@@ -61,7 +61,7 @@
     <string name="pref_summary_start_day_hour">Es l\'hora del dia quan comença el matí</string>
     <string name="pref_title_start_day_hour">Hora d\'inici del matí</string>
     <string name="pref_summary_weeks_to_show">És el número màxim de setmanes visibles</string>
-    <string name="pref_title_weeks_to_show">Numero de setmanes a mostrar</string>
+    <string name="pref_title_weeks_to_show">Número de setmanes a mostrar</string>
     <string name="pref_summary_expected_duration_per_day">El temps esperat dins l\'ubicació per dia és ${h:mm}</string>
     <string name="pref_title_expected_duration_per_day">Temps diari dins l\'ubicació</string>
     <string name="pref_summary_expected_duration_per_week">El temps esperat dins l\'ubicació per setmana és ${h:mm}</string>
