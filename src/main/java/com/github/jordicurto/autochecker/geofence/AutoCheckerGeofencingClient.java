@@ -12,7 +12,7 @@ import android.util.Log;
 import com.github.jordicurto.autochecker.constants.AutoCheckerConstants;
 import com.github.jordicurto.autochecker.data.model.WatchedLocation;
 import com.github.jordicurto.autochecker.manager.AutoCheckerNotificationManager;
-import com.github.jordicurto.autochecker.receiver.AutoCheckerBroadcastReceiver;
+import com.github.jordicurto.autochecker.receiver.AutoCheckerGeofencingReceiver;
 import com.github.jordicurto.autochecker.util.ContextKeeper;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.location.Geofence;
@@ -37,7 +37,7 @@ public class AutoCheckerGeofencingClient extends ContextKeeper {
 
     private final String TAG = getClass().getSimpleName();
 
-    private GeofencingClient mGeofencingClient = null;
+    private GeofencingClient mGeofencingClient;
     private PendingIntent mGeofencePendingIntent = null;
     private List<Geofence> geofencesToAdd = new ArrayList<>();
 
@@ -64,7 +64,7 @@ public class AutoCheckerGeofencingClient extends ContextKeeper {
         if (mGeofencePendingIntent != null) {
             return mGeofencePendingIntent;
         } else {
-            Intent intent = AutoCheckerBroadcastReceiver.createBroadcastIntent(getContext(),
+            Intent intent = AutoCheckerGeofencingReceiver.createIntent(getContext(),
                     AutoCheckerConstants.GEOFENCE_TRANSITION_RECEIVED);
             return PendingIntent.getBroadcast(getContext(), 0, intent,
                     PendingIntent.FLAG_UPDATE_CURRENT);

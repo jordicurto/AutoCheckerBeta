@@ -40,6 +40,7 @@ import com.github.jordicurto.autochecker.manager.AutoCheckerBusinessManager;
 import com.github.jordicurto.autochecker.manager.AutoCheckerNotificationManager;
 import com.github.jordicurto.autochecker.manager.AutoCheckerPreferencesManager;
 import com.github.jordicurto.autochecker.receiver.AutoCheckerBroadcastReceiver;
+import com.github.jordicurto.autochecker.service.AutoCheckerIntentService;
 import com.github.jordicurto.autochecker.util.DateUtils;
 import com.polyak.iconswitch.IconSwitch;
 
@@ -92,7 +93,7 @@ public class AutoCheckerMainActivity extends AppCompatActivity implements
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            Log.d(TAG, "Intent received: " + intent.getAction());
+            Log.d(TAG, "Intent received:  " + intent.getAction());
 
             if (intent.getAction() != null &&
                     intent.getAction().equals(AutoCheckerConstants.INTENT_ACTIVITY_RELOAD_REQUEST)) {
@@ -295,6 +296,7 @@ public class AutoCheckerMainActivity extends AppCompatActivity implements
         if (prefs.getLong(AutoCheckerConstants.INSTALL_TIME, 0) < installTime) {
             prefs.edit().putLong(AutoCheckerConstants.INSTALL_TIME, installTime).apply();
             checkLocationSettings();
+            AutoCheckerBroadcastReceiver.registerReceiver(getApplicationContext());
         }
     }
 
@@ -318,7 +320,7 @@ public class AutoCheckerMainActivity extends AppCompatActivity implements
         if(grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             mAutoCheckerNotificationManager.cancelNotification(
                     AutoCheckerConstants.NOTIFICATION_PERMISSION_REQUIRED);
-            checkLocationSettings();
+            checkFirstRun();
         } else {
             mAutoCheckerNotificationManager.notifyPermissionRequired(
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
@@ -326,10 +328,8 @@ public class AutoCheckerMainActivity extends AppCompatActivity implements
     }
 
     private void checkLocationSettings() {
-        Intent intent = AutoCheckerBroadcastReceiver.createBroadcastIntent(
+        AutoCheckerIntentService.enqueueWork(
                 this, AutoCheckerConstants.INTENT_REQUEST_CHECK_LOCATION);
-        //LocalBroadcastManager.getInstance(this).
-        sendBroadcast(intent);
     }
 
     @Override
@@ -389,10 +389,8 @@ public class AutoCheckerMainActivity extends AppCompatActivity implements
     }
 
     private void confirmCancelLeaveRequest() {
-        Intent intent = AutoCheckerBroadcastReceiver.createBroadcastIntent(
+        AutoCheckerIntentService.enqueueWork(
                 this, AutoCheckerConstants.INTENT_CANCEL_LEAVE_LOCATION);
-        //LocalBroadcastManager.getInstance(this).
-        sendBroadcast(intent);
     }
 
     private void confirmLeaveRequest() {
@@ -442,12 +440,10 @@ public class AutoCheckerMainActivity extends AppCompatActivity implements
     }
 
     private void sendForceLeaveRequest(Duration selectedDuration) {
-        Intent intent = AutoCheckerBroadcastReceiver.createBroadcastIntent(
-                this, AutoCheckerConstants.INTENT_FORCE_LEAVE_LOCATION);
-        intent.putExtra(AutoCheckerConstants.INTENT_FORCE_LEAVE_LOCATION_EXTRA_DURATION,
+        AutoCheckerIntentService.enqueueWork(
+                this, AutoCheckerConstants.INTENT_FORCE_LEAVE_LOCATION,
+                AutoCheckerConstants.INTENT_FORCE_LEAVE_LOCATION_EXTRA_DURATION,
                 selectedDuration.getMillis());
-        //LocalBroadcastManager.getInstance(this)
-        sendBroadcast(intent);
     }
 
     @Override

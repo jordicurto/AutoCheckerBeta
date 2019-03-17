@@ -6,7 +6,7 @@ import android.util.Log;
 
 import com.github.jordicurto.autochecker.constants.AutoCheckerConstants;
 import com.github.jordicurto.autochecker.data.model.WatchedLocation;
-import com.github.jordicurto.autochecker.receiver.AutoCheckerBroadcastReceiver;
+import com.github.jordicurto.autochecker.receiver.AutoCheckerGeofencingReceiver;
 import com.github.jordicurto.autochecker.util.ContextKeeper;
 
 import org.joda.time.LocalDateTime;
@@ -30,7 +30,7 @@ public class AutoCheckerTransitionManager extends ContextKeeper {
 
     private Intent createIntent(WatchedLocation location, long time, int direction) {
 
-        Intent intent = AutoCheckerBroadcastReceiver.createBroadcastIntent(getContext(),
+        Intent intent = AutoCheckerGeofencingReceiver.createIntent(getContext(),
                 AutoCheckerConstants.GEOFENCE_TRANSITION_CONFIRM_RECEIVED);
         intent.putExtra(AutoCheckerConstants.LOCATION_ID, location.getId());
         intent.putExtra(AutoCheckerConstants.TRANSITION_TIME, time);
@@ -46,7 +46,7 @@ public class AutoCheckerTransitionManager extends ContextKeeper {
 
     public void cancelScheduledRegisterTransition() {
 
-        Intent intent = AutoCheckerBroadcastReceiver.createBroadcastIntent(getContext(),
+        Intent intent = AutoCheckerGeofencingReceiver.createIntent(getContext(),
                 AutoCheckerConstants.GEOFENCE_TRANSITION_CONFIRM_RECEIVED);
         mAutoCheckerAlarmsManager.cancelAlarm(intent);
     }
@@ -67,7 +67,6 @@ public class AutoCheckerTransitionManager extends ContextKeeper {
         // Notify activities
         Intent intentAct = new Intent(AutoCheckerConstants.INTENT_ACTIVITY_RELOAD_REQUEST);
         intentAct.putExtra(AutoCheckerConstants.LOCATION_ID, location.getId());
-        //LocalBroadcastManager.getInstance(getContext()).
         getContext().sendBroadcast(intentAct);
     }
 

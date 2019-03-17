@@ -1,5 +1,6 @@
 package com.github.jordicurto.autochecker.constants;
 
+import com.github.jordicurto.autochecker.BuildConfig;
 import com.github.jordicurto.autochecker.data.model.WatchedLocation;
 import com.github.jordicurto.autochecker.util.DateUtils;
 
@@ -25,7 +26,7 @@ public class AutoCheckerConstants {
 
     public static final long INVALID_DELAY = -1L;
     public static final long DELAY_FOR_SUSPECT_TRANSITION = 3L * DateUtils.MINS_PER_MILLISECOND;
-    public static final long DELAY_FOR_STANDARD_TRANSITION = 30L * DateTimeConstants.MILLIS_PER_SECOND;
+    public static final long DELAY_FOR_STANDARD_TRANSITION = (BuildConfig.DEBUG ? 1L : 30L) * DateTimeConstants.MILLIS_PER_SECOND;
 
     public static final long DEFAULT_WEEKS_TO_SHOW = 12L;
     public static final Duration RECORDS_HOLD_DURATION = new Duration(DEFAULT_WEEKS_TO_SHOW * DateTimeConstants.MILLIS_PER_WEEK);
@@ -44,6 +45,8 @@ public class AutoCheckerConstants {
     public static final String ALARM_DAY_CHANGE = "ALARM_DAY_CHANGE";
     public static final String ALARM_FORCE_LEAVE_LOCATION = "ALARM_FORCE_LEAVE_LOCATION";
 
+    public static final String INTENT_START_SERVICE = "INTENT_START_SERVICE";
+    public static final String INTENT_SYSTEM_SHUTDOWN = "INTENT_SYSTEM_SHUTDOWN";
     public final static String INTENT_REQUEST_REGISTER_GEOFENCES = "INTENT_REQUEST_REGISTER_GEOFENCES";
     public final static String INTENT_PERMISSION_GRANTED = "INTENT_PERMISSION_GRANTED";
     public final static String INTENT_REQUEST_CHECK_LOCATION = "INTENT_REQUEST_CHECK_LOCATION";

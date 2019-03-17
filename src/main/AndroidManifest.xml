@@ -20,6 +20,31 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:replace="android:label">
+        <receiver
+            android:name=".receiver.AutoCheckerBootBroadcastReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".receiver.AutoCheckerGeofencingReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="GEOFENCE_TRANSITION_RECEIVED" />
+                <action android:name="GEOFENCE_TRANSITION_CONFIRM_RECEIVED" />
+                <action android:name="ALARM_FORCE_LEAVE_LOCATION" />
+                <!-- To complete -->
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name=".service.AutoCheckerIntentService"
+            android:exported="false"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
 
         <meta-data
             android:name="com.google.android.gms.version"
@@ -32,6 +57,7 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -44,27 +70,6 @@
                 android:value="com.github.jordicurto.autochecker.activity.AutoCheckerMainActivity" />
         </activity>
         <activity android:name=".util.PermissionHelper$PermissionRequestActivity" />
-
-        <receiver
-            android:name=".receiver.AutoCheckerBroadcastReceiver"
-            android:enabled="true"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="android.intent.action.ACTION_SHUTDOWN" />
-                <action android:name="android.intent.action.QUICKBOOT_POWEROFF" />
-                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
-                <action android:name="android.location.PROVIDERS_CHANGED" />
-                <action android:name="GEOFENCE_TRANSITION_RECEIVED" />
-                <action android:name="GEOFENCE_TRANSITION_CONFIRM_RECEIVED" />
-                <action android:name="INTENT_REQUEST_CHECK_LOCATION" />
-                <action android:name="INTENT_PERMISSION_GRANTED" />
-                <action android:name="INTENT_REQUEST_REGISTER_GEOFENCES" />
-                <action android:name="INTENT_FORCE_LEAVE_LOCATION" />
-                <action android:name="INTENT_CANCEL_LEAVE_LOCATION" />
-                <action android:name="ALARM_FORCE_LEAVE_LOCATION" />
-            </intent-filter>
-        </receiver>
     </application>
 
 </manifest>

@@ -67,7 +67,7 @@
     <string name="pref_summary_expected_duration_per_week">El temps esperat dins l\'ubicació per setmana és ${h:mm}</string>
     <string name="pref_title_expected_duration_per_week">Temps setmanal dins l\'ubicació</string>
     <string name="set">Configura</string>
-    <string name="channel_name">Notifications</string>
+    <string name="notification_channel_name">Totes les Notificacions</string>
     <string name="confirm_force_leave_loaction_text">Atura</string>
     <string name="leave_dialog_title_text">Atura registre de temps</string>
     <string name="cancel">Cancel·la</string>

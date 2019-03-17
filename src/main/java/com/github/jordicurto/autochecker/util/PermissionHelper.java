@@ -4,6 +4,7 @@ package com.github.jordicurto.autochecker.util;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.os.ResultReceiver;
@@ -11,7 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 
 import com.github.jordicurto.autochecker.constants.AutoCheckerConstants;
 import com.github.jordicurto.autochecker.manager.AutoCheckerNotificationManager;
-import com.github.jordicurto.autochecker.receiver.AutoCheckerBroadcastReceiver;
+import com.github.jordicurto.autochecker.service.AutoCheckerIntentService;
 
 /**
  * Provides helper methods to request permissions from components other than Activities.
@@ -41,16 +42,13 @@ public class PermissionHelper {
          * specified in the {@link Intent} that started the activity, then closes the activity.
          */
         @Override
-        public void onRequestPermissionsResult(int requestCode, String permissions[],
-                                               int[] grantResults) {
+        public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[],
+                                               @NonNull int[] grantResults) {
             Bundle resultData = new Bundle();
             resultData.putStringArray(AutoCheckerConstants.KEY_PERMISSIONS, permissions);
             resultData.putIntArray(AutoCheckerConstants.KEY_GRANT_RESULTS, grantResults);
-            Intent intent = AutoCheckerBroadcastReceiver.createBroadcastIntent(
-                    this, AutoCheckerConstants.INTENT_PERMISSION_GRANTED);
-            intent.putExtras(resultData);
-            //LocalBroadcastManager.getInstance(this).
-            sendBroadcast(intent);
+            AutoCheckerIntentService.enqueueWork(
+                    this, AutoCheckerConstants.INTENT_PERMISSION_GRANTED, resultData);
             mAutoCheckerNotificationManager.cancelNotification(
                     AutoCheckerConstants.NOTIFICATION_PERMISSION_REQUIRED);
             finish();

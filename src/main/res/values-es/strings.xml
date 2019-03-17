@@ -42,7 +42,7 @@
     <string name="pref_summary_expected_duration_per_week">El tiempo esperado dentro de la ubicación por semana es ${h:mm}</string>
     <string name="pref_title_expected_duration_per_week">Tiempo semanal dentro de la ubicación</string>
     <string name="set">Configura</string>
-    <string name="channel_name">Notifications</string>
+    <string name="notification_channel_name">Todas las Notificaciones</string>
     <string-array name="number_str_array">
         <item>cero</item>
         <item>una</item>

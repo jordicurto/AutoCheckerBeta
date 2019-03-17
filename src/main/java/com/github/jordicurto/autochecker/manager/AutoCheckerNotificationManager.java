@@ -27,7 +27,8 @@ import org.joda.time.LocalDateTime;
 public class AutoCheckerNotificationManager extends ContextKeeper {
 
     private NotificationManager nManager;
-    private String CHANNEL_ID = "AUTOCHECKER_NOTIFICATION_CHANNEL";
+    private String IMPORTANT_CHANNEL_ID = "AUTOCHECKER_NOTIFICATION_CHANNEL_IMPORTANT";
+    // TODO: Add notication channels
 
     public AutoCheckerNotificationManager(Context context) {
         super(context);
@@ -40,9 +41,9 @@ public class AutoCheckerNotificationManager extends ContextKeeper {
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is new and not in the support library
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = getContext().getString(R.string.channel_name);
+            CharSequence name = getContext().getString(R.string.notification_channel_name);
             int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+            NotificationChannel channel = new NotificationChannel(IMPORTANT_CHANNEL_ID, name, importance);
             // Register the channel with the system; you can't change the importance
             // or other notification behaviors after this
             nManager.createNotificationChannel(channel);
@@ -66,7 +67,7 @@ public class AutoCheckerNotificationManager extends ContextKeeper {
                         PendingIntent.FLAG_UPDATE_CURRENT
                 );
 
-        return new NotificationCompat.Builder(getContext(), CHANNEL_ID)
+        return new NotificationCompat.Builder(getContext(), IMPORTANT_CHANNEL_ID)
                 .setSmallIcon(smallIcon)
                 .setContentTitle(title)
                 .setContentText(text)

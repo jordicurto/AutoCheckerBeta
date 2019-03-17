@@ -1,13 +1,12 @@
 package com.github.jordicurto.autochecker.location;
 
 import android.content.Context;
-import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.github.jordicurto.autochecker.constants.AutoCheckerConstants;
 import com.github.jordicurto.autochecker.manager.AutoCheckerNotificationManager;
-import com.github.jordicurto.autochecker.receiver.AutoCheckerBroadcastReceiver;
+import com.github.jordicurto.autochecker.service.AutoCheckerIntentService;
 import com.github.jordicurto.autochecker.util.ContextKeeper;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.CommonStatusCodes;
@@ -55,10 +54,8 @@ public class AutoCheckerLocationSettingsClient extends ContextKeeper {
             @Override
             public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
                 Log.i(TAG, "Location settings are OK");
-                Intent intent = AutoCheckerBroadcastReceiver.createBroadcastIntent(getContext(),
+                AutoCheckerIntentService.enqueueWork(getContext(),
                         AutoCheckerConstants.INTENT_REQUEST_REGISTER_GEOFENCES);
-                //LocalBroadcastManager.getInstance(getContext()).
-                getContext().sendBroadcast(intent);
                 mAutoCheckerNotificationManager.cancelNotification(
                         AutoCheckerConstants.NOTIFICATION_ENABLE_LOCATION);
             }
