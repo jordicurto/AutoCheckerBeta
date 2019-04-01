@@ -34,10 +34,16 @@
             android:enabled="true"
             android:exported="false">
             <intent-filter>
+                <action android:name="INTENT_START_RECEIVER" />
+                <action android:name="INTENT_SYSTEM_SHUTDOWN" />
+                <action android:name="INTENT_REQUEST_CHECK_LOCATION" />
+                <action android:name="INTENT_PERMISSION_GRANTED" />
+                <action android:name="INTENT_REQUEST_REGISTER_GEOFENCES" />
+                <action android:name="INTENT_FORCE_LEAVE_LOCATION" />
+                <action android:name="INTENT_CANCEL_LEAVE_LOCATION" />
                 <action android:name="GEOFENCE_TRANSITION_RECEIVED" />
                 <action android:name="GEOFENCE_TRANSITION_CONFIRM_RECEIVED" />
                 <action android:name="ALARM_FORCE_LEAVE_LOCATION" />
-                <!-- To complete -->
             </intent-filter>
         </receiver>
 

@@ -45,7 +45,7 @@ public class AutoCheckerConstants {
     public static final String ALARM_DAY_CHANGE = "ALARM_DAY_CHANGE";
     public static final String ALARM_FORCE_LEAVE_LOCATION = "ALARM_FORCE_LEAVE_LOCATION";
 
-    public static final String INTENT_START_SERVICE = "INTENT_START_SERVICE";
+    public static final String INTENT_START_RECEIVER = "INTENT_START_RECEIVER";
     public static final String INTENT_SYSTEM_SHUTDOWN = "INTENT_SYSTEM_SHUTDOWN";
     public final static String INTENT_REQUEST_REGISTER_GEOFENCES = "INTENT_REQUEST_REGISTER_GEOFENCES";
     public final static String INTENT_PERMISSION_GRANTED = "INTENT_PERMISSION_GRANTED";

@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.preference.PreferenceManager;
 
 import com.github.jordicurto.autochecker.constants.AutoCheckerConstants;
@@ -17,6 +18,9 @@ import com.github.jordicurto.autochecker.util.DateUtils;
  */
 public class AutoCheckerAlarmsManager extends ContextKeeper {
 
+    static int ENTER_LOCATION_ALARM_ID = 0;
+    static int LEAVE_LOCATION_ALARM_ID = 1;
+
     private AlarmManager mManager;
 
     public AutoCheckerAlarmsManager(Context context) {
@@ -24,25 +28,32 @@ public class AutoCheckerAlarmsManager extends ContextKeeper {
         mManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
     }
 
-    void setAlarm(long delay, Intent intent) {
-        mManager.set(AlarmManager.RTC_WAKEUP, (System.currentTimeMillis() + delay),
-                createPendingIntent(intent));
+    void setAlarm(long delay, int id, Intent intent) {
+        if (Build.VERSION.SDK_INT >= 23) {
+            mManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,
+                    (System.currentTimeMillis() + delay),
+                    createPendingIntent(intent, id));
+        } else {
+            mManager.setExact(AlarmManager.RTC_WAKEUP, (System.currentTimeMillis() + delay),
+                    createPendingIntent(intent, id));
+        }
     }
 
-    void cancelAlarm(Intent intent) {
-        mManager.cancel(createPendingIntent(intent));
+    void cancelAlarm(Intent intent, int id) {
+        mManager.cancel(createPendingIntent(intent, id));
     }
 
     private void setRepeatingAlarm(long startOffset, long interval, Intent intent) {
+        int REPEATING_ALARM_ID = 2;
         mManager.setRepeating(AlarmManager.RTC_WAKEUP,
                 (System.currentTimeMillis() + startOffset), interval,
-                createPendingIntent(intent));
+                createPendingIntent(intent, REPEATING_ALARM_ID));
     }
 
     public void setAlarmForceLeaveLocation(long duration) {
         Intent intent = AutoCheckerGeofencingReceiver.createIntent(getContext(),
                 AutoCheckerConstants.ALARM_FORCE_LEAVE_LOCATION);
-        setAlarm(duration, intent);
+        setAlarm(duration, ENTER_LOCATION_ALARM_ID, intent);
     }
 
     public void configureNotificationDurationAlarm() {
@@ -72,11 +83,11 @@ public class AutoCheckerAlarmsManager extends ContextKeeper {
     public void cancelAlarmForceLeaveLocation() {
         Intent intent = AutoCheckerGeofencingReceiver.createIntent(getContext(),
                 AutoCheckerConstants.ALARM_FORCE_LEAVE_LOCATION);
-        cancelAlarm(intent);
+        cancelAlarm(intent, ENTER_LOCATION_ALARM_ID);
     }
 
-    private PendingIntent createPendingIntent(Intent intent) {
-        return PendingIntent.getBroadcast(getContext(), 0, intent,
+    private PendingIntent createPendingIntent(Intent intent, int id) {
+        return PendingIntent.getBroadcast(getContext(), id, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
     }
 }

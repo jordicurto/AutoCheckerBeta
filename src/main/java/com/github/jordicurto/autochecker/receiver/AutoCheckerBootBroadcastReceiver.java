@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.github.jordicurto.autochecker.constants.AutoCheckerConstants;
-import com.github.jordicurto.autochecker.service.AutoCheckerIntentService;
 
 public class AutoCheckerBootBroadcastReceiver extends BroadcastReceiver {
 
@@ -15,17 +14,25 @@ public class AutoCheckerBootBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        if (intent.getAction() != null) {
+        String action = intent.getAction();
 
-            Log.d(TAG, "Intent received " + intent.getAction());
+        if (action != null) {
 
-            if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED) ||
-                    intent.getAction().equals(Intent.ACTION_MY_PACKAGE_REPLACED)) {
+            Log.d(TAG, "Intent received " + action);
 
-                AutoCheckerIntentService.enqueueWork(context,
-                        AutoCheckerConstants.INTENT_START_SERVICE);
+            switch (action) {
+                case Intent.ACTION_BOOT_COMPLETED:
+                case Intent.ACTION_MY_PACKAGE_REPLACED:
+
+                    context.sendBroadcast(AutoCheckerGeofencingReceiver.createIntent(context,
+                            AutoCheckerConstants.INTENT_START_RECEIVER));
+                    break;
+
+                default:
+
+                    Log.e(TAG, "Unmatched intent");
+                    break;
             }
-
         }
     }
 }

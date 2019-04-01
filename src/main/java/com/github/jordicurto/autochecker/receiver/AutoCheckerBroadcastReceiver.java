@@ -9,7 +9,6 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.github.jordicurto.autochecker.constants.AutoCheckerConstants;
-import com.github.jordicurto.autochecker.service.AutoCheckerIntentService;
 
 public class AutoCheckerBroadcastReceiver extends BroadcastReceiver {
 
@@ -42,18 +41,14 @@ public class AutoCheckerBroadcastReceiver extends BroadcastReceiver {
             Log.d(TAG, "Intent received " + action);
 
             switch (action) {
-                case Intent.ACTION_MY_PACKAGE_REPLACED:
-                    AutoCheckerIntentService.enqueueWork(context,
-                            AutoCheckerConstants.INTENT_START_SERVICE);
-                    break;
                 case LocationManager.MODE_CHANGED_ACTION:
-                    AutoCheckerIntentService.enqueueWork(context,
-                            AutoCheckerConstants.INTENT_REQUEST_CHECK_LOCATION);
+                    context.sendBroadcast(AutoCheckerGeofencingReceiver.createIntent(context,
+                            AutoCheckerConstants.INTENT_REQUEST_CHECK_LOCATION));
                     break;
                 case Intent.ACTION_SHUTDOWN:
                 case ACTION_QUICKBOOT_POWEROFF:
-                    AutoCheckerIntentService.enqueueWork(context,
-                            AutoCheckerConstants.INTENT_SYSTEM_SHUTDOWN);
+                    context.sendBroadcast(AutoCheckerGeofencingReceiver.createIntent(context,
+                            AutoCheckerConstants.INTENT_SYSTEM_SHUTDOWN));
                     break;
                 default:
                     Log.e(TAG, "Unmatched intent");

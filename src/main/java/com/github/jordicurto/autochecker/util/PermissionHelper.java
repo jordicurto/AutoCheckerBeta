@@ -12,7 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 
 import com.github.jordicurto.autochecker.constants.AutoCheckerConstants;
 import com.github.jordicurto.autochecker.manager.AutoCheckerNotificationManager;
-import com.github.jordicurto.autochecker.service.AutoCheckerIntentService;
+import com.github.jordicurto.autochecker.receiver.AutoCheckerGeofencingReceiver;
 
 /**
  * Provides helper methods to request permissions from components other than Activities.
@@ -47,8 +47,8 @@ public class PermissionHelper {
             Bundle resultData = new Bundle();
             resultData.putStringArray(AutoCheckerConstants.KEY_PERMISSIONS, permissions);
             resultData.putIntArray(AutoCheckerConstants.KEY_GRANT_RESULTS, grantResults);
-            AutoCheckerIntentService.enqueueWork(
-                    this, AutoCheckerConstants.INTENT_PERMISSION_GRANTED, resultData);
+            sendBroadcast(AutoCheckerGeofencingReceiver.createIntent(
+                    this, AutoCheckerConstants.INTENT_PERMISSION_GRANTED, resultData));
             mAutoCheckerNotificationManager.cancelNotification(
                     AutoCheckerConstants.NOTIFICATION_PERMISSION_REQUIRED);
             finish();

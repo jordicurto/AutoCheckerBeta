@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="timing_items">
+        <item>Durante 15 minutos</item>
+        <item>Durante 30 minutos</item>
+        <item>Durante 1 hora</item>
+        <item>Durante 2 horas</item>
+        <item>Hasta al final del día</item>
+    </string-array>
+</resources>

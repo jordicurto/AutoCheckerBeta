@@ -40,7 +40,7 @@ import com.github.jordicurto.autochecker.manager.AutoCheckerBusinessManager;
 import com.github.jordicurto.autochecker.manager.AutoCheckerNotificationManager;
 import com.github.jordicurto.autochecker.manager.AutoCheckerPreferencesManager;
 import com.github.jordicurto.autochecker.receiver.AutoCheckerBroadcastReceiver;
-import com.github.jordicurto.autochecker.service.AutoCheckerIntentService;
+import com.github.jordicurto.autochecker.receiver.AutoCheckerGeofencingReceiver;
 import com.github.jordicurto.autochecker.util.DateUtils;
 import com.polyak.iconswitch.IconSwitch;
 
@@ -328,8 +328,8 @@ public class AutoCheckerMainActivity extends AppCompatActivity implements
     }
 
     private void checkLocationSettings() {
-        AutoCheckerIntentService.enqueueWork(
-                this, AutoCheckerConstants.INTENT_REQUEST_CHECK_LOCATION);
+        sendBroadcast(AutoCheckerGeofencingReceiver.createIntent(this,
+                AutoCheckerConstants.INTENT_REQUEST_CHECK_LOCATION));
     }
 
     @Override
@@ -378,7 +378,8 @@ public class AutoCheckerMainActivity extends AppCompatActivity implements
 
     private void showSnackbar() {
 
-        String snackText = getString(location.isInside() ? R.string.inside_location_text :
+        String snackText = getString((location.isInside() || location.isForcedOutside()) ?
+                R.string.inside_location_text :
                 R.string.outside_location_text, location.getName());
 
         if (location.isInside() || location.isForcedOutside())
@@ -389,8 +390,8 @@ public class AutoCheckerMainActivity extends AppCompatActivity implements
     }
 
     private void confirmCancelLeaveRequest() {
-        AutoCheckerIntentService.enqueueWork(
-                this, AutoCheckerConstants.INTENT_CANCEL_LEAVE_LOCATION);
+        sendBroadcast(AutoCheckerGeofencingReceiver.createIntent(
+                this, AutoCheckerConstants.INTENT_CANCEL_LEAVE_LOCATION));
     }
 
     private void confirmLeaveRequest() {
@@ -440,10 +441,10 @@ public class AutoCheckerMainActivity extends AppCompatActivity implements
     }
 
     private void sendForceLeaveRequest(Duration selectedDuration) {
-        AutoCheckerIntentService.enqueueWork(
+        sendBroadcast(AutoCheckerGeofencingReceiver.createIntent(
                 this, AutoCheckerConstants.INTENT_FORCE_LEAVE_LOCATION,
                 AutoCheckerConstants.INTENT_FORCE_LEAVE_LOCATION_EXTRA_DURATION,
-                selectedDuration.getMillis());
+                selectedDuration.getMillis()));
     }
 
     @Override

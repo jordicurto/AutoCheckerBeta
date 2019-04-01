@@ -14,8 +14,8 @@ android {
         applicationId "com.github.jordicurto.autochecker"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 8
-        versionName "1.3.2-GTD"
+        versionCode 9
+        versionName "1.3.3-GTD"
         vectorDrawables.useSupportLibrary = true
         signingConfig signingConfigs.androidKey
     }

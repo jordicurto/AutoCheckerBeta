@@ -39,16 +39,22 @@ public class AutoCheckerTransitionManager extends ContextKeeper {
         return intent;
     }
 
-    public void scheduleRegisterTransition(WatchedLocation location, long time, int direction, long delay) {
-
-        mAutoCheckerAlarmsManager.setAlarm(delay, createIntent(location, time, direction));
+    private int getAlarmId(int direction) {
+        return direction == ENTER_TRANSITION ? AutoCheckerAlarmsManager.ENTER_LOCATION_ALARM_ID :
+                AutoCheckerAlarmsManager.LEAVE_LOCATION_ALARM_ID;
     }
 
-    public void cancelScheduledRegisterTransition() {
+    public void scheduleRegisterTransition(WatchedLocation location, long time, int direction, long delay) {
+
+        mAutoCheckerAlarmsManager.setAlarm(delay, getAlarmId(direction),
+                createIntent(location, time, direction));
+    }
+
+    public void cancelScheduledRegisterTransition(int direction) {
 
         Intent intent = AutoCheckerGeofencingReceiver.createIntent(getContext(),
                 AutoCheckerConstants.GEOFENCE_TRANSITION_CONFIRM_RECEIVED);
-        mAutoCheckerAlarmsManager.cancelAlarm(intent);
+        mAutoCheckerAlarmsManager.cancelAlarm(intent, getAlarmId(direction));
     }
 
     public void registerTransition(WatchedLocation location, long time, int direction) {

@@ -6,7 +6,7 @@ import android.util.Log;
 
 import com.github.jordicurto.autochecker.constants.AutoCheckerConstants;
 import com.github.jordicurto.autochecker.manager.AutoCheckerNotificationManager;
-import com.github.jordicurto.autochecker.service.AutoCheckerIntentService;
+import com.github.jordicurto.autochecker.receiver.AutoCheckerGeofencingReceiver;
 import com.github.jordicurto.autochecker.util.ContextKeeper;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.CommonStatusCodes;
@@ -54,8 +54,8 @@ public class AutoCheckerLocationSettingsClient extends ContextKeeper {
             @Override
             public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
                 Log.i(TAG, "Location settings are OK");
-                AutoCheckerIntentService.enqueueWork(getContext(),
-                        AutoCheckerConstants.INTENT_REQUEST_REGISTER_GEOFENCES);
+                getContext().sendBroadcast(AutoCheckerGeofencingReceiver.createIntent(getContext(),
+                        AutoCheckerConstants.INTENT_REQUEST_REGISTER_GEOFENCES));
                 mAutoCheckerNotificationManager.cancelNotification(
                         AutoCheckerConstants.NOTIFICATION_ENABLE_LOCATION);
             }

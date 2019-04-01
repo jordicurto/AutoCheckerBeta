@@ -1,8 +1,6 @@
 package com.github.jordicurto.autochecker.data.model;
 
-import org.joda.time.Duration;
 import org.joda.time.LocalDateTime;
-import org.joda.time.Minutes;
 
 import java.io.Serializable;
 
